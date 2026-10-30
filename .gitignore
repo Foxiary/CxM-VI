@@ -1,0 +1,14 @@
+# Nội dung game và mọi file sinh ra từ nó - KHÔNG commit.
+# Repo này chỉ chứa mã; dữ liệu nằm trong work/, xem README.md.
+work/
+*.cpk
+*.nsp
+*.xci
+*.tid
+*.ffu
+*.ips
+
+# Rác
+__pycache__/
+*.pyc
+.DS_Store
