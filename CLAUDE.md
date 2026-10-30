@@ -176,9 +176,17 @@ linked by `voice/voicesub.py`). Rebuild `main` only through that script.
 game's English subtitles are 25 pre-drawn `SUBTITLE/%02u.tid`. The English
 -Unlimited- (`0100E3B00F412000`) instead keeps 83 rows of (voice id, question,
 answer) as C strings in its `main`, at `.data` 0x3442D8. That is one row per
-row of `dbLibVoiceRecorder_02`, whose voice ids match the JP build in order.
-Aksys rewrote the recorder around them, and none of that exists in JP.
-`voice/unlsub.py` renders each row as one DXT5 texture:
+row of `dbLibVoiceRecorder_02` - the JP and EN databases hold the same voice
+ids in the same order - but **the table is not in database order**:
+
+- the five leads (rows 0–49) agree;
+- the 33 other characters' rows are listed in a different character order.
+
+The game names a clip by its database row, so the textures are numbered by
+that row, and each row's text is looked up in the table by voice id.
+Numbering by table position put Kotoho's answers under Mochida's questions.
+Aksys rewrote the recorder around these strings, and none of that code exists
+in JP. `voice/unlsub.py` renders each row as one DXT5 texture:
 
 - the English panel art from its BC7 `voiceRecorderParts.tid`;
 - the English `sysfont.ffu` at ×1.57, the scale measured off a screenshot;

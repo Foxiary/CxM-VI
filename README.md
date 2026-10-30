@@ -53,6 +53,7 @@ Dữ liệu cần đặt vào `work/` trước khi build:
 | `work/voice/en-unl/main` | `exefs/main` của bản USA -Unlimited- (`0100E3B00F412000` v0) |
 | `work/voice/en-unl/sysfont.ffu` | `SYSTEM.CPK` → `WINDOW/FONT/` của bản USA -Unlimited- |
 | `work/voice/en-unl/voiceRecorderParts.tid`, `extra_charParts.tid` | `GAME_02.CPK` của bản USA -Unlimited- |
+| `work/voice/en-unl/dbLibVoiceRecorder_02.gbin` | `SYSTEM.CPK` → `DATABASE/` của bản USA -Unlimited- (để xếp phụ đề theo đúng dòng) |
 | `work/voice/en-unl/jp_template.tid` | Một file `.tid` DXT5 bất kỳ của bản Nhật, chỉ để lấy header |
 
 ## Lệnh thường dùng
@@ -73,6 +74,12 @@ Thêm texture phụ đề -Unlimited- vào một GAME_02.cpk (GAME_02.cpk gốc 
 
 ```bash
 python3 voice/unlsub.py cpk GAME_02.cpk work/voice/GAME_02.new.cpk work/voice/unlsub/tex
+```
+
+Khi GAME_02.cpk đã có phụ đề và còn bị sửa chỗ khác (ví dụ thay atlas), chỉ thay những texture phụ đề đã đổi, giữ nguyên mọi thứ còn lại:
+
+```bash
+python3 voice/unlsub.py swap GAME_02.cpk work/voice/GAME_02.new.cpk work/voice/unlsub/tex
 ```
 
 Tạo file `.ips` cho khoảng cách chữ và danh sách Load/Save:

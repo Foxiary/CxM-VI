@@ -1,6 +1,6 @@
 """Vietnamese text for the Collar x Malice -Unlimited- extras, in the letters of the English BGM / Movie titles.
 
-    python3 unlimited_album.py               # render + write into both GAME_02.cpk copies
+    python3 unlimited_album.py               # render + write into all three GAME_02.cpk copies
     python3 unlimited_album.py --dry-run     # previews only (unl/preview/)
     python3 unlimited_album.py --restore     # put GAME_02.cpk back exactly as it was
 
@@ -213,7 +213,8 @@ def append_replace(path, repl):
     others_end = max(e for o, e, n in ends if n not in repl)
     ours = [o for o, e, n in ends if n in repl]
     pos = etoc_off
-    if ours and min(ours) >= others_end:
+    reclaimed = bool(ours) and min(ours) >= others_end
+    if reclaimed:
         pos = others_end                 # reclaim our old copies and any gap they left
     with open(path, 'r+b') as f:
         for name, data in repl.items():
@@ -231,7 +232,8 @@ def append_replace(path, repl):
         f.truncate(pos + etoc_size)
         assert hu.patch(head, 0, 'EtocOffset', pos)
         need = content_end - h['ContentOffset']
-        if need > h['ContentSize']:
+        # grow it for new data; after a reclaim the old value (ours) may overstate the content
+        if need > h['ContentSize'] or reclaimed:
             assert hu.patch(head, 0, 'ContentSize', need)
         f.seek(0)
         f.write(head)

@@ -2,6 +2,8 @@
 
     python3 unlsub.py tex OUTDIR          render every texture from work/voice/en-unl/
     python3 unlsub.py cpk SRC DST TEXDIR  add them to a GAME_02.cpk as SUBDIR/*.tid
+    python3 unlsub.py swap SRC DST TEXDIR replace the ones that changed in a GAME_02
+                                          that already has them
 
 The code half is unlsub.s, linked into exefs/main by voicesub.py.
 
@@ -11,8 +13,13 @@ WHERE THE ENGLISH TEXT IS
     .data as two tables of C-string pointers:
 
       0x3442D8  83 x (voice id, question, answer) - the voice recorder, one per
-                row of dbLibVoiceRecorder_02 and in its order; the JP and EN
-                databases list the same 83 voice ids
+                row of dbLibVoiceRecorder_02, but NOT in its order: rows 0..49
+                (the five leads) agree, the 33 others are listed in a
+                different character order. The game knows a clip by its
+                database row, so en_tables() reorders this table by the
+                database's voice ids (JP and EN databases list the same ones,
+                in the same order). Taking the table's own order put Kotoho's
+                answers under Mochida's questions.
       0x3434C8  225 x (voice id, line) - what a character says on the Extra
                 screen (ALBUM / VOICE RECORDER / ...), looked up by the voice
                 id being played
@@ -60,6 +67,7 @@ EN_FONT = os.path.join(EN, 'sysfont.ffu')          # SYSTEM.CPK WINDOW/FONT/sysf
 EN_PARTS = os.path.join(EN, 'voiceRecorderParts.tid')   # GAME_02.CPK VOICERECORDER/
 EN_CHARPARTS = os.path.join(EN, 'extra_charParts.tid')  # GAME_02.CPK EXTRA/
 TEMPLATE = os.path.join(EN, 'jp_template.tid')     # any JP DXT5 .tid, for its header
+EN_DB = os.path.join(EN, 'dbLibVoiceRecorder_02.gbin')  # SYSTEM.CPK DATABASE/
 
 EN_BUILD = '2390EB2E1E1C4134A69C88398D784AD84E4EE9AF'
 EN_RO = 0x26C000
@@ -114,7 +122,20 @@ def en_tables():
         raise SystemExit('the recorder table is not where it was')
     if not all(r[0].isdigit() for r in lines) or len({r[0] for r in lines}) != LINES:
         raise SystemExit('the Extra line table is not where it was')
-    return recorder, lines
+    by_voice = {int(r[0]): r for r in recorder}
+    order = db_voices()
+    if sorted(order) != sorted(by_voice):
+        raise SystemExit('dbLibVoiceRecorder_02 and the English table list different voices')
+    return [by_voice[v] for v in order], lines
+
+
+def db_voices():
+    """The voice id of each row of dbLibVoiceRecorder_02 (u32 at +12)."""
+    import gbnl
+    g = gbnl.GBNL(open(EN_DB, 'rb').read())
+    if g.n != ROWS or g.stride != 24:
+        raise SystemExit('%s: %d rows of %d bytes' % (EN_DB, g.n, g.stride))
+    return [struct.unpack_from('<I', g.raw, g.tbl + i * g.stride + 12)[0] for i in range(g.n)]
 
 
 def asm_lines():
@@ -510,12 +531,95 @@ def cmd_cpk(src, dst, texdir):
              gtoc_head + len(new_gtoc), dst))
 
 
+def cmd_swap(src, dst, texdir):
+    """Write src to dst with every SUBDIR file that differs from texdir replaced.
+
+    For a CPK that already carries the subtitles and has been edited since -
+    someone repacking its atlases - so rebuilding it from an older source with
+    `cpk` would undo their work. The new bytes are appended after the content
+    and only numeric cells change: each replaced row's FileSize, ExtractSize
+    and FileOffset, and the header's ContentSize, EtocOffset and the two
+    Enabled sizes. The old bytes stay behind, unreferenced. dst starts as an
+    APFS clone of src.
+    """
+    import shutil
+    import subprocess
+    from cpk import UTF
+    from patch_sub import align_up
+
+    with open(src, 'rb') as fh:
+        head = bytearray(fh.read(0x800))
+        hdr = UTF(head, 0x10).rows[0]
+        fh.seek(0)
+        prefix = bytearray(fh.read(hdr['ContentOffset']))
+        fh.seek(hdr['EtocOffset'])
+        etoc = fh.read(hdr['EtocSize'])
+        if hdr['EtocOffset'] + hdr['EtocSize'] != os.path.getsize(src):
+            raise SystemExit('ETOC is not the last thing in %s' % src)
+        toc_utf = UTF(prefix, hdr['TocOffset'] + 0x10)
+        swaps = []
+        for i, r in enumerate(toc_utf.rows):
+            if r['DirName'] != SUBDIR:
+                continue
+            path = os.path.join(texdir, r['FileName'])
+            if not os.path.exists(path):
+                raise SystemExit('%s has no %s' % (texdir, r['FileName']))
+            blob = open(path, 'rb').read()
+            fh.seek(hdr['TocOffset'] + r['FileOffset'])
+            if r['FileSize'] != len(blob) or fh.read(r['FileSize']) != blob:
+                swaps.append((i, r['FileName'], blob))
+    if not swaps:
+        print('nothing differs')
+        return
+
+    end = hdr['ContentOffset'] + hdr['ContentSize']
+    cursor = align_up(end, hdr['Align'])
+    placed = []
+    for i, name, blob in swaps:
+        cursor = align_up(cursor, hdr['Align'])
+        for cell, value in (('FileSize', len(blob)), ('ExtractSize', len(blob)),
+                            ('FileOffset', cursor - hdr['TocOffset'])):
+            if not toc_utf.patch(prefix, i, cell, value):
+                raise SystemExit('cannot patch %s of %s' % (cell, name))
+        placed.append((cursor, blob))
+        cursor += len(blob)
+    etoc_off = align_up(cursor, hdr['Align'])
+    added = sum(len(b) for _i, _n, b in swaps)
+    head_utf = UTF(prefix, 0x10)
+    for cell, value in (('ContentSize', cursor - hdr['ContentOffset']),
+                        ('EnabledPackedSize', hdr['EnabledPackedSize'] + added),
+                        ('EnabledDataSize', hdr['EnabledDataSize'] + added),
+                        ('EtocOffset', etoc_off)):
+        if not head_utf.patch(prefix, 0, cell, value):
+            raise SystemExit('cannot patch ' + cell)
+
+    tmp = dst + '.part'
+    if os.path.exists(tmp):
+        os.remove(tmp)
+    subprocess.run(['cp', '-c', src, tmp], check=True)
+    with open(tmp, 'r+b') as fo:
+        fo.seek(0)
+        fo.write(prefix)
+        fo.truncate(hdr['EtocOffset'])
+        fo.seek(0, 2)
+        for off, blob in placed:
+            fo.write(b'\0' * (off - fo.tell()))
+            fo.write(blob)
+        fo.write(b'\0' * (etoc_off - fo.tell()))
+        fo.write(etoc)
+    shutil.move(tmp, dst)
+    print('replaced %d files (%s ... %s), %d bytes appended -> %s'
+          % (len(swaps), swaps[0][1], swaps[-1][1], added, dst))
+
+
 def main():
     cmd = sys.argv[1] if len(sys.argv) > 1 else ''
     if cmd == 'tex' and len(sys.argv) == 3:
         cmd_tex(sys.argv[2])
     elif cmd == 'cpk' and len(sys.argv) == 5:
         cmd_cpk(*sys.argv[2:5])
+    elif cmd == 'swap' and len(sys.argv) == 5:
+        cmd_swap(*sys.argv[2:5])
     else:
         raise SystemExit(__doc__)
 
