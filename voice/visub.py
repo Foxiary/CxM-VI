@@ -34,7 +34,8 @@ THE FONT
     `advance - 12` units as every horizontal line in the mod is (CLAUDE.md,
     letter spacing). The cells overlap at that step, so a line draws every
     glyph's dark edge before any of their white (Font.line). The question in
-    the red bar is drawn without the edge, as the English one is. It has no glyph at the Vietnamese code points: the 2021
+    the red bar gets a 2-texel dark outline instead, grown from the scaled
+    letters: the font's own edge vanishes at 0.40. It has no glyph at the Vietnamese code points: the 2021
     patch drew each Vietnamese letter over a borrowed one (Greek, Cyrillic,
     circled digits) and its text uses those. VI_2021 is that table. Nothing in
     the repo recorded it, so it was read back out of the 2021 text in
@@ -84,7 +85,8 @@ BAR = (161, 19, 619, 62)               # the red bar, exclusive
 BAND = (166, 26, 615, 54)              # its question band, rows 26 and 54 kept
 BODY = (138, 66, 645, 437)             # inside the frame, where text was
 BODY_COLOUR = (8, 0, 2, 242)
-Q_X, Q_SCALE = 174, 0.40
+Q_X, Q_SCALE, Q_STROKE = 174, 0.40, 2
+STROKE_COLOUR, STROKE_ALPHA = (40, 6, 4), 230   # the question's outline
 A_X, A_RIGHT, A_TOP, A_BOTTOM = 143, 640, 80, 436
 A_SCALES = [s / 100 for s in range(40, 29, -1)]
 SPACING = -12                          # units added to every advance
@@ -231,27 +233,42 @@ class Font:
     def width(self, text):
         return sum(self.glyph(c)[0] for c in text)
 
-    def line(self, text, scale, edge=True):
+    def line(self, text, scale, stroke=0):
         """RGBA image of one line at `scale`, cell rows 0..74 included.
 
         At `adv - 12` each cell overlaps the one before it, so drawing glyph by
         glyph lets a letter's dark edge cover the white of its neighbour: the
         question on the red bar came out smudged. Every edge goes down first,
-        then every letter. `edge=False` leaves the edge out, as the English
-        question in the red bar has none.
+        then every letter.
+
+        The font's own edge is 1-4 px of translucent black at full size, under
+        a pixel once scaled to 0.40: on the red bar it does not show. With
+        `stroke` (texels) the edge is replaced by a solid dark outline grown
+        from the scaled letters themselves, so it is even all round and never
+        reaches into the next letter's white.
         """
-        from PIL import Image
+        from PIL import Image, ImageFilter
         size = (max(self.width(text), 1) + 80, 75)
         im = Image.new('RGBA', size, (0, 0, 0, 0))
-        for layer in ((2, 1) if edge else (1,)):
+        for layer in ((1,) if stroke else (2, 1)):
             x = 0
             for c in text:
                 g = self.glyph(c)
                 im.alpha_composite(g[layer], (x + g[3], 0))
                 x += g[0]
         im = im.convert('RGBa').resize((round(size[0] * scale), round(75 * scale)),
-                                       Image.LANCZOS)
-        return im.convert('RGBA')
+                                       Image.LANCZOS).convert('RGBA')
+        if not stroke:
+            return im
+        pad = stroke + 1
+        ink = Image.new('RGBA', (im.width + 2 * pad, im.height + 2 * pad), (0, 0, 0, 0))
+        ink.alpha_composite(im, (pad, pad))
+        grown = ink.getchannel('A').filter(ImageFilter.MaxFilter(2 * stroke + 1))
+        grown = grown.filter(ImageFilter.GaussianBlur(0.6)).point(lambda v: min(255, v * STROKE_ALPHA // 255))
+        out = Image.new('RGBA', ink.size, STROKE_COLOUR + (0,))
+        out.putalpha(grown)
+        out.alpha_composite(ink)
+        return out.crop((pad, pad, pad + im.width, pad + im.height))
 
 
 def wrap(font, text, width, indent):
@@ -281,7 +298,7 @@ def layout(font, answer):
 
 def render(base, font, number, question, answer):
     img = base.copy()
-    title = font.line('Câu %d: %s' % (number, question), Q_SCALE, edge=False)
+    title = font.line('Câu %d: %s' % (number, question), Q_SCALE, Q_STROKE)
     bx0, by0, bx1, by1 = BAR
     if Q_X + title.width > bx1 - 8:
         raise SystemExit('question %r is wider than the bar' % question)

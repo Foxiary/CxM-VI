@@ -234,8 +234,10 @@ def append_replace(path, repl):
         f.truncate(pos + etoc_size)
         assert hu.patch(head, 0, 'EtocOffset', pos)
         need = content_end - h['ContentOffset']
-        # grow it for new data; after a reclaim the old value (ours) may overstate the content
-        if need > h['ContentSize'] or reclaimed:
+        # Grow when the new bytes run past the stored size. Shrink only when the ETOC
+        # moved backward: rewriting ContentSize on every reclaim stored a value larger
+        # than the bytes now in front of the ETOC, and the next run wrote it again.
+        if need > h['ContentSize'] or pos < etoc_off:
             assert hu.patch(head, 0, 'ContentSize', need)
         f.seek(0)
         f.write(head)
