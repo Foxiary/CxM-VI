@@ -349,3 +349,25 @@ line, the doubled quotes in STORY_02 509), `story/quotes.py`,
 `story/lead_dash.py`. From `STORY_01.before-507.cpk` and
 `STORY_02.before-quotes.cpk` the three reproduce the installed files byte for
 byte (checked 2026-11-01).
+
+## Name plates on a character's first appearance
+
+`ADV/EFFECT/401-425.CL3` (both discs) and `426-434.CL3` (-Unlimited- only)
+are the plates shown when a character first appears. JP and EN differ only
+in the texture: CWD and TI are the same, the plate is an 800x400 region of a
+1024x512 DXT5 drawn at 400x200. The English name line puts the given name
+first, with red (205,92,92) initials and white lowercase; the title line is a
+small white serif (Old Standard TT matches it).
+
+`event/nameplate.py build` rebuilds every plate from the English one in the
+mod's order, `Yanagi Aiji (28)`: it erases the English letters (red where
+r - g > 30, white above brightness 70, from y 20 to 256 outside the 143-163
+rule), puts back cut-outs of the English capitals and lowercase in family-
+first order (squeezed if too long), keeps each plate's own `(age)` cut - 417
+reads 26 on disc 1 and 24 on disc 2 - and draws the Vietnamese title from
+`event/nameplate_text.py`. Spellings follow the speaker names in STORY_01/02
+(`Sanjou`, `Souda`, `Kenzou`, `Yuusaku`). `install` appends each plate to
+GAME_01/GAME_02 in both mods through `clock_en.swap`; `restore` puts the JP
+plates back. OCR of all 55 outputs reads the Vietnamese titles exactly;
+Vision misreads several decorative initials (Y, O, M, H) but a pixel dump
+shows them drawn. Not yet checked in game.
