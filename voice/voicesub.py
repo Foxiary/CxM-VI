@@ -37,6 +37,10 @@ at US) and the character's line on the Extra screen (0xC162C, 0xC1758,
 0xC19F8, 0xC3298, 0xC22A4; state at UR). Its .rodata sections are linked
 into the page padding after .rodata (RODATA_END..DATA_VA, moved), and that
 segment grows by their size.
+
+clock.s moves the time cells of the chapter-start clock card (EFFECT 310,
+texture 現在時刻) the way the English -Unlimited- player does (hook
+0x111484).
 """
 import argparse
 import hashlib
@@ -56,6 +60,7 @@ STOCK = os.path.join(DATA, 'jp-exefs', 'main')
 SOURCE = os.path.join(HERE, 'voicesub.s')
 MARQUEE = os.path.join(HERE, 'marquee.s')
 UNLSUB = os.path.join(HERE, 'unlsub.s')
+CLOCK = os.path.join(HERE, 'clock.s')
 OUT = os.path.join(DATA, 'voicesub', 'main')
 
 # Every address below is in the STOCK layout. The build moves .rodata, .data
@@ -100,6 +105,8 @@ SYMBOLS = {
     'IS_PLAYING': 0x150B0,     # a voice is still playing
     'PAD_GOT': 0x342428,       # GOT slot of the pad array, as at 0x169740
     'DRAW_XPARTS': 0xC2CC0,    # -Unlimited- Extra screen: last part of its draw
+    'MEMCMP': 0x272040,        # PLT stub
+    'CK_SEND': 0x106BA0,       # the CWD player's call after a quad is laid out
 }
 
 # site -> (stock instruction, cave entry, link). Each stock word is checked
@@ -132,6 +139,9 @@ HOOKS = {
     0xC19F8: (0x97FD4CE6, 'ur_play', True),      # bl   0x14D90
     0xC3298: (0x97FFFE8A, 'ur_draw', True),      # bl   0xC2CC0
     0xC22A4: (0x940116AF, 'ur_release', True),   # bl   0x107D60
+    # The CWD player's sprite loop, once a quad's corners are on the stack:
+    # the clock card's AM/PM goes after the minutes (clock.s).
+    0x111484: (0x97FFD5C7, 'ck_draw', True),     # bl   0x106BA0
 }
 
 def moved(va):
@@ -152,7 +162,7 @@ def assemble():
     tmp = tempfile.mkdtemp()
     elf, raw, ro = (os.path.join(tmp, n) for n in ('c.elf', 'c.bin', 'r.bin'))
     objs = []
-    for i, src in enumerate((SOURCE, MARQUEE, UNLSUB)):
+    for i, src in enumerate((SOURCE, MARQUEE, UNLSUB, CLOCK)):
         objs.append(os.path.join(tmp, 'c%d.o' % i))
         subprocess.run([os.path.join(LLVM, 'clang'), '-target', 'aarch64-none-elf',
                         '-c', src, '-o', objs[-1]], check=True)

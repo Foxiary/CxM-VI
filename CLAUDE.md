@@ -311,11 +311,20 @@ code in all four executables, and its `changeDate_NumeRal.tid` is a different
 picture. The CWD inside places one cell per object (`月10`, `月1`, `日10`,
 `日1`, `AM/PM`, `時10`, `時1`, `分10`, `分1`).
 
-The English main game kept the JP CWD and only redrew `現在時刻.tid`, so
-its picture in the JP CWD reads `PM0:1 05` in game: the AM/PM cell is still
-first. The English -Unlimited- ships a different, older CWD (`CWDL002`) that
-puts AM/PM last. `event/clock_en.py` puts the English main game's texture
-(BC7 re-encoded to DXT5) in GAME_01, and the English -Unlimited- file whole in
-GAME_02, its two textures re-encoded to DXT5 with the JP header (format byte
-0x90, not its 0x94). Whether the JP engine plays a CWDL002 file is not yet
-checked in game; `clock_en.py restore` puts the JP file back.
+The cell order is not in the CWD. Both English executables (main game and
+-Unlimited-) add a block to the CWD player's sprite loop (EN -Unlimited-
+0x11FB04..0x11FC48, not in JP 0x110F70): when the texture is named
+`現在時刻` it shifts each quad by its first corner's x - +15 for 200-500,
++135 for 500-600 (AM/PM past the minutes), -54 from 600 (hours, colon,
+minutes left). With the English picture but no shift the JP game read
+`PM0:1 05`. `voice/clock.s` adds the same block at JP 0x111484 (`bl 0x106BA0`,
+the first call after the quad is laid out, EN 0x11FC50), linked by
+`voicesub.py`; the English block also covers the BADEND and Shiraishi-route
+clock effects, which still carry JP textures and are left alone here.
+
+`event/clock_en.py` puts the English main game's texture (BC7 re-encoded to
+DXT5) into the JP 310.CL3 for GAME_01, and the English -Unlimited- file whole
+into GAME_02 (CWDL002, same objects; textures re-encoded with the JP header,
+format byte 0x90 for its 0x94). The CWDL002 file loads in the JP engine
+(checked in game); the shift is not yet checked. `clock_en.py restore` puts
+the JP file back.
