@@ -1,6 +1,6 @@
 """Vietnamese text for the Collar x Malice -Unlimited- extras, in the letters of the English BGM / Movie titles.
 
-    python3 unlimited_album.py               # render + write into all three GAME_02.cpk copies
+    ../work/album/.venv/bin/python unlimited_album.py   # render + write into all three GAME_02.cpk copies (needs numpy)
     python3 unlimited_album.py --dry-run     # previews only (unl/preview/)
     python3 unlimited_album.py --restore     # put GAME_02.cpk back exactly as it was
 
@@ -15,12 +15,13 @@ WHAT IS CHANGED (all in GAME_02.cpk, which the patch never touched)
     CHAPTERLIST/chapterListParts1.tid      route tabs - copied block for block from the
     SITUATION/parts.tid                    OK / Tro ve buttons   Vietnamese GAME_01 versions,
                                                                  whose atlases have the same layout
+    CHAR_SELECT/char_selthum0..9.tid       the 調査完了 stamp -> "Đã điều tra" (charsel_stamp.py)
 
 HOW IT IS WRITTEN
     Every file in GAME_02.cpk is CRILAYLA-compressed and there is no compressor here, so the new
     textures are stored uncompressed and cannot go back in place. They are appended where the
     ETOC table was, the ETOC is moved after them, and only numeric cells are patched: FileOffset /
-    FileSize / ExtractSize of the five TOC rows and EtocOffset / ContentSize in the header. No
+    FileSize / ExtractSize of the replaced TOC rows and EtocOffset / ContentSize in the header. No
     other byte of the 3.7 GB file moves. The first run saves the header block and the old tail
     (unl/backup/); every run restores them first, so re-running is idempotent and --restore gives
     back the original file bit for bit (checked against its saved SHA-1).
@@ -29,6 +30,7 @@ import argparse, hashlib, json, os, unicodedata
 from PIL import Image
 
 import album_en_letters as ae
+import charsel_stamp
 import en_glyphs as eg
 from cpk import UTF, crilayla
 from tid import TID
@@ -46,7 +48,7 @@ CPKS = [os.path.expanduser('~/Documents/Ryujinx/sdcard/atmosphere/contents/01002
 
 VR, BGM, MOV, CHAP, SIT = ('VOICERECORDER/voiceRecorderParts.tid', 'BGM/bgm_Parts.tid', 'MOVIE/movieParts.tid',
                            'CHAPTERLIST/chapterListParts1.tid', 'SITUATION/parts.tid')
-NAMES = [VR, BGM, MOV, CHAP, SIT]
+NAMES = [VR, BGM, MOV, CHAP, SIT] + charsel_stamp.NAMES
 
 # ---------------------------------------------------------------- text
 
@@ -376,6 +378,10 @@ def build():
     for name, rect in ((CHAP, CHAP_RECT), (SIT, SIT_RECT)):
         final[name] = copy_blocks(original(name), read_file(ae.CPKS[0], name), rect)
         print('  %s: blocks of %s copied from GAME_01' % (name, rect))
+
+    # Character select: the 調査完了 stamp on the third card of each thumbnail
+    stamps, _views = charsel_stamp.build({n: original(n) for n in charsel_stamp.NAMES})
+    final.update(stamps)
     return final, en
 
 
