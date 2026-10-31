@@ -19,6 +19,7 @@ toolkit, pinned here as the `ve-es/` submodule. Every script puts
     album/   the Extra / Album / BGM / ending list textures and their font
     story/   repairs to STORY scripts
     event/   a small DXT5 encoder the others use
+    movie/   the English route-intro movies on -Unlimited-
 
 The repo holds no game content. Each script reads and writes under
 `work/<folder>/` (gitignored, `DATA` in the script): the stock and English
@@ -237,6 +238,23 @@ moves the GTOC and the content down and adds the same delta to every
 `FileOffset`, which is relative to `TocOffset`. Confirmed in game on
 2026-10-31.
 
+**The main game's 25 recorder subtitles are in Vietnamese** (`voice/visub.py`).
+They are still pictures at `SUBTITLE/00..24.tid` in GAME_01. The script
+redraws them on the English panel, with the text wiped out by a per-pixel median
+of all 25. The translation, by Yui on Ellipsus, is copied as plain text into
+`work/voice/mainsub/vi.txt`. The text is drawn in the game's own
+`font_Normal.ffu`, stepped at `adv - 12` like every other line. Its answers
+run about three times the English length, so they are drawn at scale 0.40
+(0.37 for one of them), up to 12 lines. `visub.py swap` replaces the files in
+place in the installed GAME_01. Not yet checked in game.
+
+**The 2021 Vietnamese encoding** (`VI_2021` in `visub.py`) was not written
+down anywhere and has been read back out of the 2021 SYSTEM text:
+- the lowercase letters, from the words they spell;
+- the capitals, from the same tone order in their own blocks;
+- `Ê` = `×` and `Ô` = `÷`.
+Any new text drawn in the 2021 fonts goes through that table.
+
 ## Growing exefs/main
 
 **Growing .text means moving everything after it.** The cave in the page
@@ -264,3 +282,22 @@ A switch's size comes from its `cmp` guard, which is not always next to it:
 - 0x4488C compares a different copy of the index.
 
 Cave data still goes after `.rodata`, in its page padding.
+
+## English saves on the JP build
+
+The per-slot `SaveDataXXXXXX.sav` files are the same format in both releases
+and carry over. `SystemData0000.sav` (Extra unlocks, read marks, system flags)
+does not: JP holds both discs in one file, English splits them over two
+titles, so copying either English file locks the other disc's Extra and puts
+-Unlimited-'s flags on the wrong indices (disc 2's 365 flags start at 76 in JP,
+at 6 in English). `save/merge_en_system.py` builds the JP file from the two
+English ones; the layout is in its docstring.
+
+## Route-intro movies on -Unlimited-
+
+Each -Unlimited- route opens its first chapter with `pro01..06.usm`
+(`dbEntryMovie_02` rows 7-12) in MOVIE_02.cpk, Japanese text burned into the
+picture. The English -Unlimited- has the same cuts with English text, same
+VP9 1080p stream, same `total_frames` and `total_samples`, so
+`movie/pro_en.py` swaps the six files as they are. op and ed01-06 stay JP.
+Not yet checked in game.
