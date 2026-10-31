@@ -301,3 +301,14 @@ picture. The English -Unlimited- has the same cuts with English text, same
 VP9 1080p stream, same `total_frames` and `total_samples`, so
 `movie/pro_en.py` swaps the six files as they are. op and ed01-06 stay JP.
 Not yet checked in game.
+
+## The clock card at chapter starts
+
+The card that slides in at a chapter start ("04月 10日 PM01:05", English
+"MONTH 04 / DAY 10 / TIME 01:05PM") is the effect `ADV/EFFECT/310.CL3`
+(`310_現在時刻`), not the CHANGE_DATE screen: `taskChangeDateDraw` is the same
+code in all four executables, and its `changeDate_NumeRal.tid` is a different
+picture. The CL3's CWD and TIs are byte-identical between JP and the English
+main game; only `現在時刻.tid` (2048x512) was redrawn, AM/PM included, so
+`event/clock_en.py` re-encodes the English BC7 to DXT5 into the JP file and
+swaps it into GAME_01 and GAME_02 of both mods. Not yet checked in game.
