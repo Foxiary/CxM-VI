@@ -325,6 +325,7 @@ clock textures, which clock.s does not touch (not examined).
 `event/clock_en.py` puts the English main game's texture (BC7 re-encoded to
 DXT5) into the JP 310.CL3 for GAME_01, and the English -Unlimited- file whole
 into GAME_02 (CWDL002, same objects; textures re-encoded with the JP header,
-format byte 0x90 for its 0x94). The CWDL002 file loads in the JP engine
-(checked in game); the shift is not yet checked. `clock_en.py restore` puts
-the JP file back.
+format byte 0x90 for its 0x94). With clock.s the -Unlimited- card reads
+`MONTH 04 / DAY 10 / TIME 01:05PM` as in English; confirmed in game on
+2026-11-01 (chapter 1 of Yanagi's route). The main game's card is not yet
+checked. `clock_en.py restore` puts the JP file back.
