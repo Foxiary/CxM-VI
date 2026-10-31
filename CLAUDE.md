@@ -339,3 +339,10 @@ where the GTOC was, and pressing Start in the main game gave a black screen.
 STORY_02 (GTOC at 10240, content at 12288) was not hit. repack now starts at
 the first file (VE-ES da0e752). Check `GtocOffset` before trusting any CPK
 written by an older repack.
+
+The STORY text repairs run in this order, each over the last one's output:
+`story/line_fixes.py` (whole lines replaced by hand: the untranslated 507
+line, the doubled quotes in STORY_02 509), `story/quotes.py`,
+`story/lead_dash.py`. From `STORY_01.before-507.cpk` and
+`STORY_02.before-quotes.cpk` the three reproduce the installed files byte for
+byte (checked 2026-11-01).
