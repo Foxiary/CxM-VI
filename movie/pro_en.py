@@ -1,7 +1,16 @@
-"""English route-intro movies on -Unlimited-.
+"""English story-intro movies on both discs.
 
-    python3 movie/pro_en.py build     extract both MOVIE_02, write work/movie/MOVIE_02.cpk
-    python3 movie/pro_en.py install   copy it into both installed mods
+    python3 movie/pro_en.py build     write work/movie/MOVIE_01.cpk and MOVIE_02.cpk
+    python3 movie/pro_en.py install   copy them into both installed mods
+
+The main game opens its prologue (chapter 0) with /prologue.usm
+(dbEntryMovie_01 row 1) in MOVIE_01.cpk: "X-Day 事件における経過報告" and
+the case report typed out in Japanese. The English main game
+(010083E00F40E000, its romfs already extracted under ~/Documents/Game) has the
+same movie with the text in English: same VP9 stream size and 1350 frames;
+its audio is 496 samples (10 ms) shorter, so the sample count may differ by
+up to AUDIO_SLACK. Only prologue.usm is replaced in MOVIE_01 (op, ed01-05
+stay JP). The rest below is about MOVIE_02.
 
 Each route of -Unlimited- opens its first chapter with a movie,
 dbEntryMovie_02 rows 7-12 (柳PRO ... アドニスPRO -> /pro01.usm ... /pro06.usm),
@@ -36,6 +45,8 @@ VENV_PY = os.path.join(ROOT, 'work', 'album', '.venv', 'bin', 'python')
 MODS = [os.path.expanduser('~/Documents/Ryujinx/mods/contents/01002b400e9da000/PatchVietHoa/romfs/CONTENTS'),
         os.path.expanduser('~/Documents/Ryujinx/sdcard/atmosphere/contents/01002b400e9da000/romfs/CONTENTS')]
 MOVIES = ['pro%02d.usm' % i for i in range(1, 7)]
+EN1_CPK = os.path.join(GAME, '010083E00F40E000', 'romfs', 'MOVIE_01.CPK')
+AUDIO_SLACK = 1024             # samples; 21 ms at 48 kHz
 
 
 def extract(nsp, name, out):
@@ -63,38 +74,47 @@ def usm_info(data):
     return info
 
 
-def build():
-    jp = CPK(extract(JP_NSP, 'CONTENTS/MOVIE_02.cpk', os.path.join(DATA, 'jp')))
-    en = CPK(extract(EN_NSP, 'MOVIE_02.CPK', os.path.join(DATA, 'en')))
+def swap(jp, en, names, out):
+    """Write jp with every file in names replaced by en's copy; check and read back."""
     en_files = {f: r for _i, f, r in en.files()}
+    jp_files = {f: r for _i, f, r in jp.files()}
     rep = {}
-    for _i, full, r in jp.files():
-        if full not in MOVIES:
-            continue
+    for full in names:
+        r = jp_files[full]
         new = en.read(en_files[full])
         a, b = usm_info(jp.read(r)), usm_info(new)
-        if a != b:
+        if a['total_frames'] != b['total_frames'] or \
+                abs(a['total_samples'] - b['total_samples']) > AUDIO_SLACK:
             raise SystemExit('%s: JP %s, EN %s - not a drop-in' % (full, a, b))
-        print('  %s  %s frames, %s samples  %s -> %s bytes' % (
-            full, a['total_frames'], a['total_samples'],
+        print('  %s  %s frames, %s/%s samples  %s -> %s bytes' % (
+            full, a['total_frames'], a['total_samples'], b['total_samples'],
             format(r['FileSize'], ','), format(len(new), ',')))
         rep[full] = new
-    out = os.path.join(DATA, 'MOVIE_02.cpk')
     jp.repack(out, rep)
-    # read back: every file is where the TOC says and the swapped ones are EN
     chk = CPK(out)
     for _i, full, r in chk.files():
-        want = rep[full] if full in rep else jp.read(dict((f, x) for _j, f, x in jp.files())[full])
-        assert chk.read(r) == want, full
+        assert chk.read(r) == rep.get(full, jp.read(jp_files[full])), full
+    if chk.hdr.get('GtocOffset'):
+        g = chk.hdr['GtocOffset']
+        assert bytes(chk.raw[g:g + 4]) == b'GTOC', 'GTOC overwritten in ' + out
     print('  ok', out)
 
 
+def build():
+    jp = CPK(extract(JP_NSP, 'CONTENTS/MOVIE_01.cpk', os.path.join(DATA, 'jp1')))
+    swap(jp, CPK(EN1_CPK), ['prologue.usm'], os.path.join(DATA, 'MOVIE_01.cpk'))
+    jp = CPK(extract(JP_NSP, 'CONTENTS/MOVIE_02.cpk', os.path.join(DATA, 'jp')))
+    en = CPK(extract(EN_NSP, 'MOVIE_02.CPK', os.path.join(DATA, 'en')))
+    swap(jp, en, MOVIES, os.path.join(DATA, 'MOVIE_02.cpk'))
+
+
 def install():
-    src = os.path.join(DATA, 'MOVIE_02.cpk')
-    for d in MODS:
-        dst = os.path.join(d, 'MOVIE_02.cpk')
-        shutil.copyfile(src, dst)
-        print('  ->', dst)
+    for name in ('MOVIE_01.cpk', 'MOVIE_02.cpk'):
+        src = os.path.join(DATA, name)
+        for d in MODS:
+            dst = os.path.join(d, name)
+            shutil.copyfile(src, dst)
+            print('  ->', dst)
 
 
 if __name__ == '__main__':

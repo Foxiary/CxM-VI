@@ -19,7 +19,7 @@ toolkit, pinned here as the `ve-es/` submodule. Every script puts
     album/   the Extra / Album / BGM / ending list textures and their font
     story/   repairs to STORY scripts
     event/   a small DXT5 encoder the others use
-    movie/   the English route-intro movies on -Unlimited-
+    movie/   the English story-intro movies (prologue, -Unlimited- routes)
 
 The repo holds no game content. Each script reads and writes under
 `work/<folder>/` (gitignored, `DATA` in the script): the stock and English
@@ -293,14 +293,17 @@ titles, so copying either English file locks the other disc's Extra and puts
 at 6 in English). `save/merge_en_system.py` builds the JP file from the two
 English ones; the layout is in its docstring.
 
-## Route-intro movies on -Unlimited-
+## Story-intro movies
 
-Each -Unlimited- route opens its first chapter with `pro01..06.usm`
+The main game's prologue (chapter 0) opens with `/prologue.usm` in
+MOVIE_01.cpk ("X-Day 事件における経過報告", typed in Japanese). Each
+-Unlimited- route opens its first chapter with `pro01..06.usm`
 (`dbEntryMovie_02` rows 7-12) in MOVIE_02.cpk, Japanese text burned into the
-picture. The English -Unlimited- has the same cuts with English text, same
-VP9 1080p stream, same `total_frames` and `total_samples`, so
-`movie/pro_en.py` swaps the six files as they are. op and ed01-06 stay JP.
-Not yet checked in game.
+picture. The English builds have the same cuts with English text, same VP9
+1080p stream and frame count (the English prologue's audio is 10 ms
+shorter), so `movie/pro_en.py` swaps the seven files as they are. op and
+the endings stay JP. The mods did not carry a MOVIE_01.cpk before; they do
+now. The prologue is not yet checked in game.
 
 ## The clock card at chapter starts
 
