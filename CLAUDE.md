@@ -177,12 +177,22 @@ handler (JP 0x3FFD0) calls 0x906E0, which `strcmp`s the name against field 0
 of each row of `dbCharaNameInfo_01` (`_02` on -Unlimited-, picked by the disc
 global at 0x90658). It stores the first match's `+132` at window `+552`, and
 no match gives 7, the neutral window. The table spells each lead three ways,
-all in Japanese. The 2021 STORY_01 writes speakers in English, so only the 148
-Japanese names left in 3000-3004.DAT matched. `save/name_colour.py` puts the
-English names into rows 0-5, the full-width-space spelling no script uses,
-and keeps their colour fields: 24,747 of 32,098 names now match. The rest are
-side characters (also 7 in JP), bare surnames and `A & B`. STORY_02 and
-`_02` are both still Japanese and already matched.
+all in Japanese, while the 2021 patch names every speaker on both discs in
+English, family name first, so nothing matched.
+
+**The name the game reads is not the instruction's own data block.** The
+2021 scripts moved their text to a section after the code and point the
+name instruction's first parameter there (stock JP points it at the inline
+block). The inline block still holds a stale string that nothing reads -
+`Aiji Yanagi` in STORY_01, Japanese in 3000-3004.DAT and all of STORY_02.
+Reading the inline blocks, a first fix wrote `Aiji Yanagi` into the table and
+changed nothing on screen. Follow the parameter for any 2021 script text.
+
+`save/name_colour.py` puts `Yanagi Aiji`, `Hoshino #Name[1]`, ... into rows
+0-5 of both tables, the full-width-space spelling no script uses, and keeps
+their colour fields: 24,748 of 32,098 speaker names match in STORY_01 and
+1,638 of 1,993 in STORY_02. The rest are side characters (also 7 in JP), bare
+given names and `A & B`.
 
 ## Subtitles the English build has and JP does not
 
