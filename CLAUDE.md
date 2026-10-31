@@ -319,8 +319,8 @@ The cell order is not in the CWD. Both English executables (main game and
 minutes left). With the English picture but no shift the JP game read
 `PM0:1 05`. `voice/clock.s` adds the same block at JP 0x111484 (`bl 0x106BA0`,
 the first call after the quad is laid out, EN 0x11FC50), linked by
-`voicesub.py`; the English block also covers the BADEND and Shiraishi-route
-clock effects, which still carry JP textures and are left alone here.
+`voicesub.py`; the English block also names the BADEND and Shiraishi-route
+clock textures, which clock.s does not touch (not examined).
 
 `event/clock_en.py` puts the English main game's texture (BC7 re-encoded to
 DXT5) into the JP 310.CL3 for GAME_01, and the English -Unlimited- file whole
