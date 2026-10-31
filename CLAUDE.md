@@ -308,7 +308,14 @@ The card that slides in at a chapter start ("04月 10日 PM01:05", English
 "MONTH 04 / DAY 10 / TIME 01:05PM") is the effect `ADV/EFFECT/310.CL3`
 (`310_現在時刻`), not the CHANGE_DATE screen: `taskChangeDateDraw` is the same
 code in all four executables, and its `changeDate_NumeRal.tid` is a different
-picture. The CL3's CWD and TIs are byte-identical between JP and the English
-main game; only `現在時刻.tid` (2048x512) was redrawn, AM/PM included, so
-`event/clock_en.py` re-encodes the English BC7 to DXT5 into the JP file and
-swaps it into GAME_01 and GAME_02 of both mods. Not yet checked in game.
+picture. The CWD inside places one cell per object (`月10`, `月1`, `日10`,
+`日1`, `AM/PM`, `時10`, `時1`, `分10`, `分1`).
+
+The English main game kept the JP CWD and only redrew `現在時刻.tid`, so
+its picture in the JP CWD reads `PM0:1 05` in game: the AM/PM cell is still
+first. The English -Unlimited- ships a different, older CWD (`CWDL002`) that
+puts AM/PM last. `event/clock_en.py` puts the English main game's texture
+(BC7 re-encoded to DXT5) in GAME_01, and the English -Unlimited- file whole in
+GAME_02, its two textures re-encoded to DXT5 with the JP header (format byte
+0x90, not its 0x94). Whether the JP engine plays a CWDL002 file is not yet
+checked in game; `clock_en.py restore` puts the JP file back.

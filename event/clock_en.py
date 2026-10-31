@@ -1,7 +1,9 @@
 """English clock card (month / day / time) on both discs.
 
-    python3 event/clock_en.py build     write work/date/out/310.CL3
-    python3 event/clock_en.py install   put it in GAME_01 and GAME_02 of both mods
+    python3 event/clock_en.py build       work/date/out/310.CL3      (GAME_01)
+    python3 event/clock_en.py build_unl   work/date/out/310_unl.CL3  (GAME_02)
+    python3 event/clock_en.py install     both into both mods
+    python3 event/clock_en.py restore     put the JP 310.CL3 back everywhere
 
 The card that slides in when a chapter starts - "MONTH 04 / DAY 10 /
 TIME 01:05PM" in the English release, "04月 10日 PM01:05" in JP - is not the
@@ -39,7 +41,9 @@ TEX = '現在時刻.tid'
 EN_CPK = os.path.expanduser('~/Documents/Game/010083E00F40E000/romfs/GAME_01.CPK')
 MODS = [os.path.expanduser('~/Documents/Ryujinx/mods/contents/01002b400e9da000/PatchVietHoa/romfs/CONTENTS'),
         os.path.expanduser('~/Documents/Ryujinx/sdcard/atmosphere/contents/01002b400e9da000/romfs/CONTENTS')]
-OUT = os.path.join(DATA, 'out', '310.CL3')
+OUT = os.path.join(DATA, 'out', '310.CL3')            # GAME_01
+OUT_UNL = os.path.join(DATA, 'out', '310_unl.CL3')    # GAME_02
+UNL_NSP = os.path.expanduser('~/Documents/Game/Collar X Malice -Unlimited [0100E3B00F412000] [USA] [v0].nsp')
 
 
 def read_file(cpk_path, name):
@@ -97,6 +101,70 @@ def build():
     print('  %s: %s replaced with the English picture (%dx%d BC7 -> DXT5) -> %s' % (NAME, TEX, w, h, OUT))
 
 
+def unl_tex(raw):
+    """Decode one texture of the English -Unlimited- CL3.
+
+    Its TIDs carry format byte 0x94, not the 0x90 of every other TID seen, and
+    tid.TID refuses them; +4 is not the total size either. The payload is still
+    plain linear BC7 right after the 128-byte header (it decodes to the same
+    picture as the English main game's 0x90 copy), so it is read directly.
+    """
+    if raw[:3] != b'TID' or raw[0x64:0x68] != b'BC7 ':
+        raise SystemExit('unexpected TID %r %r' % (raw[:4], raw[0x64:0x68]))
+    from PIL import Image
+    w, h = struct.unpack_from('<II', raw, 0x44)
+    size = struct.unpack_from('<I', raw, 0x58)[0]
+    if size != w * h or len(raw) != 0x80 + size:
+        raise SystemExit('BC7 payload %d for %dx%d in %d bytes' % (size, w, h, len(raw)))
+    return Image.frombytes('RGBA', (w, h), bytes(raw[0x80:]), 'bcn', 7)
+
+
+def build_unl():
+    """310.CL3 for GAME_02: the English -Unlimited- file whole, textures as DXT5.
+
+    Its CWD (CWDL002) places the AM/PM cell after the minutes, which the JP
+    CWD cannot: with the English picture in the JP CWD the time read
+    "PM0:1 05". Everything is kept from the English file - CWD, TIs, the CL3
+    tables - except the two textures, re-encoded BC7 -> DXT5 (same byte count,
+    16 bytes per 4x4 block) and given the JP header layout: format byte 0x90,
+    +4 = total size, fourcc DXT5 and the JP flags word at 0x78.
+    """
+    sys.path.insert(0, os.path.join(ROOT, 'album'))
+    import subprocess
+    en_dir = os.path.join(DATA, 'unl')
+    en_path = os.path.join(en_dir, 'ADV__EFFECT__310.CL3')
+    if not os.path.exists(en_path):
+        subprocess.check_call([os.path.join(ROOT, 'work', 'album', '.venv', 'bin', 'python'),
+                               os.path.join(HERE, 'nsp_cpk_file.py'), UNL_NSP, 'GAME_02.CPK', NAME, en_dir])
+    en = bytearray(open(en_path, 'rb').read())
+    jp = read_file(os.path.join(MODS[0], 'GAME_02.cpk'), NAME)
+    jp_hdr = part(jp, TEX)[2][:0x80]
+    if b'CWDL002' not in part(en, '.CWD')[2][:16]:
+        raise SystemExit('English -Unlimited- 310.CL3 is not the CWDL002 file expected')
+    for name, (o, sz) in members(en).items():
+        if not name.endswith('.tid'):
+            continue
+        raw = en[o:o + sz]
+        img = unl_tex(raw).convert('RGBA')
+        w, h = img.size
+        payload = encode_into(b'\0' * (w // 4 * h // 4 * 16), img, (0, 0, w, h))
+        new = bytearray(raw[:0x80])
+        new[3] = jp_hdr[3]                       # 0x90
+        new[0x64:0x68] = b'DXT5'
+        new[0x78:0x7C] = jp_hdr[0x78:0x7C]       # 01 01 01 00 in every JP TID
+        new += payload
+        if len(new) != sz:
+            raise SystemExit('%s: %d != %d' % (name, len(new), sz))
+        struct.pack_into('<I', new, 4, len(new))
+        if TID(bytes(new)).image().size != (w, h):
+            raise SystemExit('re-read of %s failed' % name)
+        en[o:o + sz] = new
+        print('  %s %dx%d BC7 -> DXT5' % (name, w, h))
+    os.makedirs(os.path.dirname(OUT_UNL), exist_ok=True)
+    open(OUT_UNL, 'wb').write(en)
+    print('  -> %s (%d bytes, JP file was %d)' % (OUT_UNL, len(en), len(jp)))
+
+
 def swap(cpk_path, blob):
     """Append blob after the content and repoint NAME's TOC row (cpk stays in place, old bytes orphaned)."""
     from patch_sub import align_up
@@ -140,24 +208,40 @@ def swap(cpk_path, blob):
 
 
 def install():
+    """GAME_01 gets OUT (English picture in the JP CWD), GAME_02 OUT_UNL (the English -Unlimited- file)."""
     sys.path.insert(0, os.path.join(ROOT, 'voice'))
-    blob = open(OUT, 'rb').read()
+    blobs = {'GAME_01.cpk': open(OUT, 'rb').read(), 'GAME_02.cpk': open(OUT_UNL, 'rb').read()}
     backup = os.path.join(DATA, 'backup')
     os.makedirs(backup, exist_ok=True)
     for d in MODS:
-        for g in ('GAME_01.cpk', 'GAME_02.cpk'):
+        for g, blob in blobs.items():
             p = os.path.join(d, g)
-            if read_file(p, NAME) == blob:
+            cur = read_file(p, NAME)
+            if cur == blob:
                 print('  already in', p)
                 continue
             keep = os.path.join(backup, '%s.%s.310.CL3' % (os.path.basename(os.path.dirname(os.path.dirname(d))), g))
             if not os.path.exists(keep):
-                open(keep, 'wb').write(read_file(p, NAME))
+                open(keep, 'wb').write(cur)
             swap(p, blob)
             if read_file(p, NAME) != blob:
                 raise SystemExit('read-back failed for ' + p)
             print('  ->', p)
 
 
+def restore():
+    """Put the JP 310.CL3 saved by the first install back into every CPK."""
+    sys.path.insert(0, os.path.join(ROOT, 'voice'))
+    backup = os.path.join(DATA, 'backup')
+    for d in MODS:
+        for g in ('GAME_01.cpk', 'GAME_02.cpk'):
+            keep = os.path.join(backup, '%s.%s.310.CL3' % (os.path.basename(os.path.dirname(os.path.dirname(d))), g))
+            blob = open(keep, 'rb').read()
+            p = os.path.join(d, g)
+            if read_file(p, NAME) != blob:
+                swap(p, blob)
+            print('  restored', p)
+
+
 if __name__ == '__main__':
-    {'build': build, 'install': install}[sys.argv[1]]()
+    {'build': build, 'build_unl': build_unl, 'install': install, 'restore': restore}[sys.argv[1]]()
