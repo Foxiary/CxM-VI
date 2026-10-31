@@ -8,6 +8,7 @@ Những gì repo này thêm vào game:
 - Phụ đề tiếng Anh cho Voice Recorder của game chính và -Unlimited-, giống bản USA.
 - Phụ đề cho câu nhân vật nói ở màn Extra của -Unlimited-.
 - Khoảng cách chữ đều ở mọi màn hình, kể cả danh sách Load/Save.
+- Khung thoại đổi màu theo người nói, như bản Nhật (bản 2021 làm mất).
 - Danh sách Dictionary cắt tên ở cuối thanh đỏ và cho chữ chạy khi chọn.
 - Chữ trên texture của màn Extra / Album / BGM / danh sách ending.
 
@@ -86,6 +87,13 @@ Tạo file `.ips` cho khoảng cách chữ và danh sách Load/Save:
 
 ```bash
 python3 save/savelist_ips.py work/voice/jp-exefs/main ~/Documents/Ryujinx/mods/contents/01002b400e9da000/PatchVietHoa/exefs
+```
+
+Cho khung thoại đổi màu theo người nói (sửa `dbCharaNameInfo_01` trong SYSTEM.cpk):
+
+```bash
+python3 save/name_colour.py SYSTEM.cpk work/save/namecolour STORY_01.cpk
+python3 ve-es/tools/cpk.py repack SYSTEM.cpk work/save/SYSTEM.new.cpk work/save/namecolour
 ```
 
 Sau khi build, chép GAME_02.cpk mới vào cả hai thư mục mod (`mods/.../PatchVietHoa` và

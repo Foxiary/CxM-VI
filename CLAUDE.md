@@ -170,6 +170,20 @@ the widest other title. They do not fit the list column, so `main` now clips eac
 the end of its red bar and scrolls the selected one (`voice/marquee.s`,
 linked by `voice/voicesub.py`). Rebuild `main` only through that script.
 
+## Message window colour by speaker
+
+The window's colour comes from the speaker name. The name instruction's
+handler (JP 0x3FFD0) calls 0x906E0, which `strcmp`s the name against field 0
+of each row of `dbCharaNameInfo_01` (`_02` on -Unlimited-, picked by the disc
+global at 0x90658). It stores the first match's `+132` at window `+552`, and
+no match gives 7, the neutral window. The table spells each lead three ways,
+all in Japanese. The 2021 STORY_01 writes speakers in English, so only the 148
+Japanese names left in 3000-3004.DAT matched. `save/name_colour.py` puts the
+English names into rows 0-5, the full-width-space spelling no script uses,
+and keeps their colour fields: 24,747 of 32,098 names now match. The rest are
+side characters (also 7 in JP), bare surnames and `A & B`. STORY_02 and
+`_02` are both still Japanese and already matched.
+
 ## Subtitles the English build has and JP does not
 
 **-Unlimited-'s voice-recorder subtitles are text, not textures.** The main
