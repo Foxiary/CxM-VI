@@ -329,3 +329,13 @@ format byte 0x90 for its 0x94). With clock.s the -Unlimited- card reads
 `MONTH 04 / DAY 10 / TIME 01:05PM` as in English; confirmed in game on
 2026-11-01 (chapter 1 of Yanagi's route). The main game's card is not yet
 checked. `clock_en.py restore` puts the JP file back.
+
+## STORY_01.cpk keeps its GTOC at ContentOffset
+
+The stock STORY_01.cpk has `GtocOffset == ContentOffset == 8192` and its first
+file at 10240. VE-ES `cpk.py repack` used to lay files from ContentOffset, so
+every STORY_01 it wrote (story/quotes.py, story/lead_dash.py) had a script
+where the GTOC was, and pressing Start in the main game gave a black screen.
+STORY_02 (GTOC at 10240, content at 12288) was not hit. repack now starts at
+the first file (VE-ES da0e752). Check `GtocOffset` before trusting any CPK
+written by an older repack.
