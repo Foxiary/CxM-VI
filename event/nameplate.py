@@ -199,6 +199,7 @@ def cut(im, comp, pad=2, red=False):
 
 
 CAP_CLEAR = 8
+LETTER_GAP = 4                      # ink gap between lowercase letters (EN median)
 
 
 def clear_of(cap, cap_y, gi, gy, x):
@@ -223,30 +224,51 @@ def clear_of(cap, cap_y, gi, gy, x):
     return max(x, need)
 
 
+XLET = 'acemnorsuvwxzi'                # no ascender or descender (i without its dot)
+
+
+def word_metrics(im, n):
+    """[(baseline y, x-height, size class)] of the two words of English plate n. The English
+    plates set the first word's lowercase at x-height ~30 and the second's at ~25 (both ~25 on
+    most -Unlimited- plates); the class is 'L' or 'S'."""
+    out = []
+    for (cap, ls), word in zip(name_parts(im), EN_NAMES[n].split()):
+        body = [c for c in ls if c[3] - c[2] > 12][:len(word) - 1]
+        xs = [c for c, ch in zip(body, word[1:]) if ch in XLET]
+        base = sorted(c[3] for c in xs)[len(xs) // 2] if xs else cap[3] - 8
+        xh = sorted(c[3] - c[2] + 1 for c in xs)[len(xs) // 2] if xs else 30
+        out.append((base, xh, 'L' if xh >= 29 else 'S'))
+    return out
+
+
 class Letters:
-    """Glyphs cut from the English plates: initials by size class, small letters, age pieces."""
+    """Glyphs cut from the English plates: initials per word slot, lowercase per size class,
+    every glyph's top kept relative to its word's baseline so a word sits on one line."""
 
     def __init__(self, ims):
-        self.caps = {1: {}, 2: {}}          # word slot -> letter -> (img, top)
+        self.caps = {1: {}, 2: {}}          # word slot -> letter -> (img, top - baseline)
         self.kern = {}                      # (slot, initial) -> [EN ink gap to the next letter, px]
-        self.small = {}                     # letter -> (img, top, advance)
-        self.age = {}                       # plate -> [(img, x, y)]
+        self.small = {'L': {}, 'S': {}}     # size class -> letter -> (img, top - baseline, ink width)
+        self.xh = {'L': [], 'S': []}
         for n, im in ims.items():
             words = name_parts(im)
             given, family = EN_NAMES[n].split()
             if len(words) != 2:
                 raise SystemExit('plate %d: %d words' % (n, len(words)))
-            for slot, ((cap, letters), word) in enumerate(zip(words, (given, family)), 1):
+            metrics = word_metrics(im, n)
+            for slot, ((cap, letters), word, (base, xh, cls)) in enumerate(
+                    zip(words, (given, family), metrics), 1):
                 ci, cx, cy = cut(im, cap, red=True)
-                self.caps[slot].setdefault(word[0], (ci, cy))
+                self.caps[slot].setdefault(word[0], (ci, cy - base))
+                self.xh[cls].append(xh)
                 if letters:
                     self.kern.setdefault((slot, word[0]), []).append(letters[0][0] - cap[1])
                 body = [c for c in letters if c[3] - c[2] > 12]
                 dots = [c for c in letters if c[3] - c[2] <= 12]
                 rest = word[1:]
                 if slot == 2:
-                    age, body = body[len(rest):], body[:len(rest)]
-                    self.age[n] = [cut(im, c) for c in age + [d for d in dots if d[0] > (age[0][0] if age else 10 ** 6) - 5]]
+                    age = body[len(rest):]
+                    body = body[:len(rest)]
                     dots = [d for d in dots if not age or d[0] < age[0][0] - 5]
                 if len(body) != len(rest):
                     continue
@@ -255,9 +277,26 @@ class Letters:
                     merged = (min([comp[0]] + [d[0] for d in mine]), max([comp[1]] + [d[1] for d in mine]),
                               min([comp[2]] + [d[2] for d in mine]), max([comp[3]] + [d[3] for d in mine]),
                               comp[4] + sum((d[4] for d in mine), []))
-                    if ch not in self.small:
+                    if ch not in self.small[cls]:
                         gi, gx, gy = cut(im, merged)
-                        self.small[ch] = (gi, gy, merged[1] - merged[0] + 1)
+                        # letters without a descender sit with their own ink bottom on the
+                        # baseline (the English baseline wanders a pixel or two per plate)
+                        bottom = base if ch in 'gjpqy' else merged[3]
+                        self.small[cls][ch] = (gi, gy - bottom, merged[1] - merged[0] + 1)
+        for cls in self.xh:
+            v = sorted(self.xh[cls])
+            self.xh[cls] = v[len(v) // 2]
+
+    def glyph(self, ch, cls):
+        """(img, top - baseline, ink width) of a lowercase letter in size class cls; taken from
+        the other class and scaled by the x-height ratio when this one never had it."""
+        if ch in self.small[cls]:
+            return self.small[cls][ch]
+        other = 'S' if cls == 'L' else 'L'
+        gi, rel, w = self.small[other][ch]
+        f = self.xh[cls] / self.xh[other]
+        gi = gi.resize((max(1, round(gi.width * f)), max(1, round(gi.height * f))), Image.LANCZOS)
+        return gi, round(rel * f), round(w * f)
 
     def age_of(self, im, n):
         """The age "(nn)" cut from this very plate (disc 1 and disc 2 differ on 417)."""
@@ -284,18 +323,21 @@ class Letters:
                                 px[x + dx, y + dy] = bg[x + dx, y + dy]
         return out
 
-    def word(self, text, slot):
-        """[(img, x, y)] of one word, x from its initial's left edge; the cap scaled to its slot."""
+    def word(self, text, slot, base, cls):
+        """[(img, x, y)] of one word on baseline `base`, x from its initial's left edge; the
+        initial is this slot's, the lowercase of size class cls."""
         cap = self.caps[slot].get(text[0]) or self.caps[3 - slot].get(text[0])
         if cap is None:
             raise SystemExit('no initial %r' % text[0])
-        ci, cy = cap
+        ci, rel = cap
         if text[0] not in self.caps[slot]:
-            # borrowed from the other word: scale to this slot's cap height, same baseline (y 121 / 114)
+            # borrowed from the other word: scale to this slot's cap height; the first word's
+            # initial sits 8 px below the baseline, the second's 1 px
             want = 90 if slot == 1 else 64
             f = want / (ci.height - 4)
             ci = ci.resize((round(ci.width * f), round(ci.height * f)), Image.LANCZOS)
-            cy = (121 if slot == 1 else 114) - ci.height + 2
+            rel = (8 if slot == 1 else 1) - ci.height + 2
+        cy = base + rel
         out = [(ci, 0, cy)]
         # The first letter starts where it does after this initial in English: same gap from
         # the initial's last ink column to the letter's first (median over the plates; it is
@@ -308,12 +350,13 @@ class Letters:
             gap = gap * (ci.width - 4) / (self.caps[3 - slot][text[0]][0].width - 4)
         x = round(ci.width - 3 + gap - 2)
         # then keep the letter CLEAR of the initial: at least CAP_CLEAR px between their ink
-        # in 2D (the English set lowercase against M's serif; in game it read as touching)
-        x = clear_of(ci, cy, self.small[text[1]][0], self.small[text[1]][1], x)
+        # (the English set lowercase against M's serif; in game it read as touching)
+        gi, grel, _w = self.glyph(text[1], cls)
+        x = clear_of(ci, cy, gi, base + grel, x)
         for ch in text[1:]:
-            gi, gy, adv = self.small[ch]
-            out.append((gi, x, gy))
-            x += adv + 3
+            gi, grel, adv = self.glyph(ch, cls)
+            out.append((gi, x, base + grel))
+            x += adv + LETTER_GAP - 1        # next ink starts LETTER_GAP after this ink ends
         return out, x
 
 
@@ -330,8 +373,13 @@ def render(n, disc, en_im, letters):
     # the way the English plates start long names further left and set them tighter
     layer = Image.new('RGBA', (900, 256), (0, 0, 0, 0))
     pen = 0
+    # one baseline for the whole line, as the English plates read
+    metrics = word_metrics(en_im, n)
+    line_base = 113
     for slot, word in ((1, fam), (2, giv)):
-        parts, width = letters.word(word, slot)
+        _b, _xh, cls = metrics[slot - 1]
+        base = line_base
+        parts, width = letters.word(word, slot, base, cls)
         for gi, x, y in parts:
             layer.alpha_composite(gi, (pen + x, y))
         pen += width + GAP_WORDS
@@ -339,7 +387,7 @@ def render(n, disc, en_im, letters):
     if pieces:
         ax0 = min(x for _i, x, _y in pieces)
         for gi, x, y in pieces:
-            layer.alpha_composite(gi, (pen - 4 + x - ax0, y))
+            layer.alpha_composite(gi, (pen - 4 + x - ax0, y + line_base - metrics[1][0]))
         pen += max(x + gi.width for gi, x, _y in pieces) - ax0
     left = 39 if pen <= RIGHT - 39 else 22
     room = RIGHT - left
