@@ -403,14 +403,17 @@ def render(n, disc, en_im, letters):
     # title
     f = ImageFont.truetype(FONT, TITLE_SIZE)
     lines = TITLES[n][1]
-    base1 = 198 if len(lines) == 2 else 216
     d = ImageDraw.Draw(out)
+    # one size for the whole title, the largest that fits every line; three lines (405, 414)
+    # are set smaller and closer so they stay inside the 163-256 band
+    size = TITLE_SIZE if len(lines) < 3 else 26
+    while size > 20 and max(d.textlength(ln, font=ImageFont.truetype(FONT, size)) for ln in lines) > RIGHT - TITLE_X:
+        size -= 1
+    fz = ImageFont.truetype(FONT, size)
+    step = {1: 0, 2: 33, 3: 28}[len(lines)]
+    base1 = {1: 216, 2: 198, 3: 188}[len(lines)]
     for i, line in enumerate(lines):
-        size = TITLE_SIZE
-        while d.textlength(line, font=ImageFont.truetype(FONT, size)) > RIGHT - TITLE_X and size > 20:
-            size -= 1
-        fz = ImageFont.truetype(FONT, size)
-        d.text((TITLE_X, base1 + 33 * i), line, font=fz, fill=(255, 255, 255, 255), anchor='ls')
+        d.text((TITLE_X, base1 + step * i), line, font=fz, fill=(255, 255, 255, 255), anchor='ls')
     return out
 
 

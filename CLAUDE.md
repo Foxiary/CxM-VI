@@ -365,7 +365,14 @@ r - g > 30, white above brightness 70, from y 20 to 256 outside the 143-163
 rule), puts back cut-outs of the English capitals and lowercase in family-
 first order (squeezed if too long), keeps each plate's own `(age)` cut - 417
 reads 26 on disc 1 and 24 on disc 2 - and draws the Vietnamese title from
-`event/nameplate_text.py`. The first lowercase letter keeps the English gap
+`event/nameplate_text.py`. The titles use the mod's own terms, found in the
+2021 STORY text (the text-section blocks, `story/stcm.py` `tblock`, decoded
+through `VI_2021` - the inline blocks are stale English) and dbDictionary:
+警視庁 `Sở cảnh sát Tokyo`, 新宿署 `Đồn Shinjuku`, 捜査一課 `Ban Điều tra số 1`,
+鑑識課 `Ban giám định`, 科学捜査研究所 `Phòng nghiên cứu tội phạm`, 特殊地域防犯対策室
+`Đặc nhiệm Phòng chống Tội phạm khu vực`, 警視総監 `Tổng thanh tra`, 依頼人
+`Người ủy thác`; each entry cites its source line. 428 says 会社員 in JP
+(EN "Corporate Executive") and takes the mod's word for it. The first lowercase letter keeps the English gap
 after its initial and then at least 8 px of dark from the initial's ink, row
 by row: at the English spacing it touched the serif of `M` in game
 (`Mochida`). Every lowercase letter sits with its ink bottom on one baseline (y 113, for
