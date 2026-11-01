@@ -392,3 +392,23 @@ GAME_01/GAME_02 in both mods through `clock_en.swap`; `restore` puts the JP
 plates back. OCR of all 55 outputs reads the Vietnamese titles exactly;
 Vision misreads several decorative initials (Y, O, M, H) but a pixel dump
 shows them drawn. Not yet checked in game.
+
+## New game: fiction disclaimer and the typed case report
+
+A new game shows the fiction disclaimer, then (main game, chapter 0)
+prologue.usm, then "X-Day 事件における経過報告書" typed out on white. The typing
+is not a movie: it is `ADV/EFFECT/100.CL3`, a CWD with one 2048x128 texture
+per keystroke; `111-117.CL3` ("Report for April, May" ... "January 1st,
+20XX") are the same kind. The English main game has its own CWDL003 files
+for all eight (fewer keystrokes, its own sound bank). The disclaimer is
+`ADV/BG/1.tid`, a 2048x2048 background, one per disc (GAME_01 main,
+GAME_02 -Unlimited-), not `SYSTEM/FICTION.tid` - that one holds the 2021
+patch's Vietnamese credits, and the English executable has no FICTION/CESA
+screen at all.
+
+`event/xday_en.py` takes the English files whole (EN main GAME_01 for the
+effects and disc 1's background, EN -Unlimited- GAME_02 out of the NSP for
+disc 2's) and re-encodes every texture BC7 -> DXT5 into the JP header layout,
+as `clock_en.py build_unl` does. `install` appends them to both mods with
+`clock_en.swap`; `restore` puts back the JP copies kept in `work/xday/backup`.
+Not yet checked in game.
