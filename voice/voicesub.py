@@ -38,6 +38,11 @@ at US) and the character's line on the Extra screen (0xC162C, 0xC1758,
 into the page padding after .rodata (RODATA_END..DATA_VA, moved), and that
 segment grows by their size.
 
+RODATA_TEXT replaces Japanese strings in .rodata that the UI draws as they
+are: the empty save slot read 新しいセーブデータ ("New Save Data" in EN). Each
+is written in place in the 2021 encoding (visub.VI_2021), NUL-padded to the
+old length, so no reference moves.
+
 clock.s moves the time cells of the chapter-start clock card (EFFECT 310,
 texture 現在時刻) the way the English -Unlimited- player does (hook
 0x111484).
@@ -112,6 +117,11 @@ SYMBOLS = {
 # site -> (stock instruction, cave entry, link). Each stock word is checked
 # before it is replaced, so a different build of `main` is refused, not
 # corrupted. All four are in the main game's recorder.
+# stock .rodata offset -> (Japanese, Vietnamese); see the docstring
+RODATA_TEXT = {
+    0x23C14: ('新しいセーブデータ', 'Dữ liệu mới'),   # empty save slot (EN New Save Data)
+}
+
 HOOKS = {
     0xC4258: (0x39044268, 'vs_play', True),      # strb w8, [x19, #272]
     0xC52F0: (0xF9400A73, 'vs_save', True),      # ldr  x19, [x19, #16]
@@ -208,6 +218,20 @@ def build_nso(segs, original):
     return bytes(head) + bytes(body)
 
 
+def rodata_text(rodata):
+    """Write RODATA_TEXT into the (moved, same-offset) .rodata in place."""
+    from visub import VI_2021
+    for off, (jp, vi) in RODATA_TEXT.items():
+        old = jp.encode('utf-8') + b'\0'
+        new = ''.join(VI_2021.get(ch, ch) for ch in vi).encode('utf-8')
+        new.decode('utf-8').encode('cp932')
+        if bytes(rodata[off:off + len(old)]) != old:
+            raise SystemExit('.rodata %#x does not hold %s' % (off, jp))
+        if len(new) >= len(old):
+            raise SystemExit('%r is longer than %s' % (vi, jp))
+        rodata[off:off + len(old)] = new.ljust(len(old), b'\0')
+
+
 def build_exe():
     import nsoshift
     original = open(STOCK, 'rb').read()
@@ -238,7 +262,9 @@ def build_exe():
         if got != word:
             raise SystemExit('%#x holds %#010x, expected %#010x' % (site, got, word))
         struct.pack_into('<I', new, site, branch(site, syms[entry], link))
-    new_ro = rodata + cave_ro
+    rodata = bytearray(rodata)
+    rodata_text(rodata)
+    new_ro = bytes(rodata) + cave_ro
 
     blob = build_nso((bytes(new), new_ro, data), head + original[HEADER:])
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
@@ -248,6 +274,11 @@ def build_exe():
     # Read the file back the way a loader would.
     after = dict(nso_segments(open(OUT, 'rb').read()))
     assert after['rodata'] == new_ro and after['data'] == data
+    # .rodata differs from the shifted stock only in RODATA_TEXT
+    _t, stock_ro, _d, _h, _l = nsoshift.shift(original, SHIFT)
+    diff = [i for i in range(len(stock_ro)) if stock_ro[i] != new_ro[i]]
+    assert all(any(o <= i < o + len(jp.encode()) + 1 for o, (jp, _v) in RODATA_TEXT.items())
+               for i in diff), [hex(i) for i in diff[:8]]
     restored = bytearray(after['text'][:TEXT_END])
     for site, (word, _entry, _link) in HOOKS.items():
         struct.pack_into('<I', restored, site, word)
