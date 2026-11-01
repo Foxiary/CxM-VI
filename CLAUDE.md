@@ -406,6 +406,15 @@ GAME_02 -Unlimited-), not `SYSTEM/FICTION.tid` - that one holds the 2021
 patch's Vietnamese credits, and the English executable has no FICTION/CESA
 screen at all.
 
+The English CWDs sound each keystroke with its own key, all on cue 0 of
+`typing_SE.acb`; that bank is byte for byte the JP one, where cue 0 is the
+whole 7-second typing recording (100) or a brush sound (111-117) that JP
+plays once. Taken as they are, every English keystroke started the long
+recording again over the last one. `xday_en.py` points cue 0 at the typing
+recording's synth and cuts that HCA to its first 4 frames (one keystroke,
+the rest made silent frames), with the waveform's NumSamples and the cue
+Length to match; same size, nothing in the CL3 moves.
+
 `event/xday_en.py` takes the English files whole (EN main GAME_01 for the
 effects and disc 1's background, EN -Unlimited- GAME_02 out of the NSP for
 disc 2's) and re-encodes every texture BC7 -> DXT5 into the JP header layout,
