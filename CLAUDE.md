@@ -351,7 +351,11 @@ and `bộ trưởng` in STORY_02 252; `save/dict_names.py` renames the main game
 dictionary entry 27 from `Bộ trưởng` to match), `story/quotes.py`,
 `story/lead_dash.py`. From `STORY_01.before-507.cpk` and
 `STORY_02.before-quotes.cpk` the three reproduce the installed files byte for
-byte (checked 2026-11-01).
+byte (checked 2026-11-01). `story/choice_align.py` then pads `CHƯƠNG.0　Mở đầu`
+in the chapter 0 choice (99.DAT) with the five spaces the 2021 text gave
+`Thường`, so the three centred choices share a left edge. Its block had no
+room, so the padded line goes in a new block at the end of the file and the
+choice's parameter points there; nothing else moves.
 
 ## Name plates on a character's first appearance
 
@@ -414,6 +418,11 @@ recording again over the last one. `xday_en.py` points cue 0 at the typing
 recording's synth and cuts that HCA to its first 4 frames (one keystroke,
 the rest made silent frames), with the waveform's NumSamples and the cue
 Length to match; same size, nothing in the CL3 moves.
+
+Chapter 0 also shows Yanagi's nightmare as nine backgrounds, `ADV/BG/812-820`
+(GAME_01 only): vertical Japanese lines ("――人殺し", "お前さえいなければ...") that
+the English build has as "-Murderer.", "If not for you, they'd still be
+alive." ... in the same 2048x2048 layout. `xday_en.py` swaps them too.
 
 `event/xday_en.py` takes the English files whole (EN main GAME_01 for the
 effects and disc 1's background, EN -Unlimited- GAME_02 out of the NSP for

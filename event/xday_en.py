@@ -36,6 +36,11 @@ the 2021 patch's Vietnamese credits). Both discs have their own: the main
 game's in GAME_01 and -Unlimited-'s in GAME_02, both Japanese. Each is
 replaced by its English counterpart (EN main GAME_01, EN -Unlimited- GAME_02,
 pulled out of the NSP with nsp_cpk_file.py), BC7 -> DXT5 into the JP header.
+
+ADV/BG/812-820 are the nine backgrounds of Yanagi's nightmare in chapter 0
+(main game only): vertical lines "――人殺し", "お前さえいなければ生きられたのに" ...
+on a dark strip. The English ones read "-Murderer.", "If not for you, they'd
+still be alive." ...; same 2048x2048 layout, swapped the same way.
 """
 import os
 import struct
@@ -61,6 +66,8 @@ VENV_PY = os.path.join(ROOT, 'work', 'album', '.venv', 'bin', 'python')
 FILES = [('GAME_01.cpk', 'ADV/EFFECT/%d.CL3' % n, 'en1') for n in (100, 111, 112, 113, 114, 115, 116, 117)]
 FILES += [('GAME_01.cpk', 'ADV/BG/1.tid', 'en1'),
           ('GAME_02.cpk', 'ADV/BG/1.tid', 'unl')]
+# Yanagi's nightmare at the start of the main game ("――人殺し" ... -> "-Murderer." ...)
+FILES += [('GAME_01.cpk', 'ADV/BG/%d.tid' % n, 'en1') for n in range(812, 821)]
 
 
 def out_name(cpk, name):
