@@ -397,6 +397,22 @@ plates back. OCR of all 55 outputs reads the Vietnamese titles exactly;
 Vision misreads several decorative initials (Y, O, M, H) but a pixel dump
 shows them drawn. Not yet checked in game.
 
+**The same plates are painted into eleven backgrounds**, ADV/BG 881-893
+(GAME_01 only), the profile shots of 403-411, 413 and 414 (892 has none).
+They are the JP plate's own pixels pasted 1:1 into the 1920x1080 picture
+(top-left of a 2048x2048 DXT5): over the plate texture's alpha mask the
+picture matches it to 0.01 levels, at (1160, 544) on the right, (160, 544)
+on the left, (1041, 544) for 882. `event/bgplate.py` pastes the built
+Vietnamese plate (`work/plate/out/<n>_1.CL3`) over the same mask and
+re-encodes only the blocks under it, after checking the JP plate is there,
+so run it after `nameplate.py build`. Not yet checked in game.
+
+`clock_en.read_file` reads one file through the TOC; it used to load the
+whole CPK per call, and eleven calls on the 3 GB GAME_01 ran past five
+minutes. A swap cut off in between leaves the two mods' GAME_01 with the
+same files at different offsets - compare contents, not bytes, or copy one
+over the other.
+
 ## New game: fiction disclaimer and the typed case report
 
 A new game shows the fiction disclaimer, then (main game, chapter 0)

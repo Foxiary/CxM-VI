@@ -47,10 +47,21 @@ UNL_NSP = os.path.expanduser('~/Documents/Game/Collar X Malice -Unlimited [0100E
 
 
 def read_file(cpk_path, name):
-    c = CPK(cpk_path)
-    for _i, full, row in c.files():
-        if full == name:
-            return c.read(row)
+    """One file out of a CPK, reading only its header, TOC and the file itself:
+    CPK() loads the whole archive, 3 GB for GAME_01, on every call."""
+    from cpk import crilayla
+    with open(cpk_path, 'rb') as fh:
+        hdr = UTF(bytearray(fh.read(0x800)), 0x10).rows[0]
+        fh.seek(0)
+        prefix = bytearray(fh.read(hdr['ContentOffset']))
+        for r in UTF(prefix, hdr['TocOffset'] + 0x10).rows:
+            full = r['DirName'] + '/' + r['FileName'] if r['DirName'] else r['FileName']
+            if full == name:
+                fh.seek(hdr['TocOffset'] + r['FileOffset'])
+                d = fh.read(r['FileSize'])
+                if r['ExtractSize'] > r['FileSize'] and d[:8] == b'CRILAYLA':
+                    d = crilayla(d)
+                return d
     raise SystemExit('%s not in %s' % (name, cpk_path))
 
 
