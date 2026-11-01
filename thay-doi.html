@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Những thay đổi so với bản Việt hoá 2021 — Collar×Malice</title>
+<style>
+  :root {
+    --bg: #100e0c;
+    --bg-2: #181512;
+    --ink: #f3eadc;
+    --muted: #b3a394;
+    --faint: #7c7064;
+    --line: #2e2823;
+    --red: #d4534a;
+    --red-deep: #8d312b;
+    --gold: #e4c98a;
+    --ok: #d7c4a2;
+    --wait: #8f8478;
+    --serif: Palatino, "Palatino Linotype", "Times New Roman", serif;
+    --sans: "Avenir Next", "Segoe UI", sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background:
+      radial-gradient(1200px 500px at 80% -10%, rgba(212, 83, 74, 0.16), transparent 55%),
+      var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.6;
+  }
+
+  a { color: var(--gold); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  a:hover { color: var(--ink); }
+
+  .wrap {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 740px);
+    gap: 48px;
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 48px 28px 96px;
+  }
+
+  nav {
+    position: sticky;
+    top: 28px;
+    align-self: start;
+    font-size: 13px;
+    line-height: 1.35;
+  }
+  nav p {
+    margin: 0 0 14px;
+    color: var(--faint);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-size: 11px;
+  }
+  nav ol { list-style: none; margin: 0; padding: 0; }
+  nav a {
+    display: block;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 6px 0 6px 12px;
+    border-left: 1px solid var(--line);
+  }
+  nav a:hover { color: var(--ink); border-left-color: var(--red); }
+
+  header.hero { margin-bottom: 36px; }
+  .kicker {
+    margin: 0 0 12px;
+    color: var(--red);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-size: 12px;
+  }
+  h1 {
+    margin: 0 0 16px;
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: clamp(36px, 5vw, 52px);
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+  }
+  .lede { margin: 0; color: var(--muted); font-size: 18px; max-width: 38em; }
+
+  .collar {
+    width: 42px;
+    height: 42px;
+    margin: 28px 0 8px;
+    border: 2px solid var(--red);
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 5px var(--bg), inset 0 0 0 7px var(--red-deep);
+  }
+
+  h2 {
+    margin: 56px 0 8px;
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 30px;
+    letter-spacing: -0.02em;
+    scroll-margin-top: 24px;
+  }
+  h2 .num {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--red);
+    font-family: var(--sans);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+  }
+  h3 {
+    margin: 28px 0 8px;
+    font-size: 15px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  p { margin: 0 0 14px; }
+  ul, ol { margin: 0 0 16px; padding-left: 1.2em; }
+  li { margin: 0 0 8px; }
+  li::marker { color: var(--red); }
+
+  .card {
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin: 16px 0 20px;
+  }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .pair h3 { margin-top: 0; }
+  .then { color: var(--muted); }
+  .now { color: var(--ink); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0 18px;
+    font-size: 15px;
+  }
+  th, td {
+    text-align: left;
+    vertical-align: top;
+    padding: 10px 12px 10px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  th { color: var(--faint); font-weight: 600; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
+  td.old { color: var(--muted); }
+
+  .tag {
+    display: inline-block;
+    margin: 0 0 12px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    border: 1px solid var(--line);
+  }
+  .tag.ok { color: var(--ok); border-color: #5c5144; }
+  .tag.wait { color: var(--wait); }
+
+  .keep {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 18px;
+    margin: 16px 0 8px;
+  }
+  .keep div {
+    padding: 12px 14px;
+    background: var(--bg-2);
+    border-radius: 10px;
+    border: 1px solid var(--line);
+  }
+  .keep strong { display: block; font-family: var(--serif); font-weight: 500; font-size: 17px; margin-bottom: 4px; }
+  .keep span { color: var(--muted); font-size: 14px; }
+
+  .figs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 8px 0 22px;
+  }
+  .figs figure { margin: 0; }
+  .figs img {
+    width: 100%;
+    height: auto;
+    display: block;
+    background: #f4efe6;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+  }
+  .figs figcaption {
+    margin-top: 6px;
+    color: var(--faint);
+    font-size: 13px;
+  }
+  .strips { grid-template-columns: 1fr; }
+  .strips img { background: #fff; }
+  .plates { grid-template-columns: 1fr 1fr; }
+  .plates img { background: #111; }
+
+  .remote-note {
+    margin-top: 28px;
+    color: var(--faint);
+    font-size: 14px;
+  }
+  footer {
+    margin-top: 28px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    color: var(--faint);
+    font-size: 13px;
+  }
+
+  @media (max-width: 860px) {
+    .wrap { grid-template-columns: 1fr; gap: 12px; padding: 28px 18px 72px; }
+    nav { position: static; }
+    nav ol { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+    nav a { border-left: 0; padding: 0; }
+    .pair, .keep, .figs { grid-template-columns: 1fr; }
+    .plates { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <p>Mục lục</p>
+    <ol>
+      <li><a href="#giu">Giữ từ 2021</a></li>
+      <li><a href="#chu">Khoảng cách chữ</a></li>
+      <li><a href="#mau">Màu khung thoại</a></li>
+      <li><a href="#phude">Phụ đề</a></li>
+      <li><a href="#tudien">Từ điển</a></li>
+      <li><a href="#album">BGM, phim, ending</a></li>
+      <li><a href="#kichban">Kịch bản</a></li>
+      <li><a href="#bangten">Bảng tên</a></li>
+      <li><a href="#dongho">Thẻ ngày giờ</a></li>
+      <li><a href="#phim">Phim mở đầu</a></li>
+      <li><a href="#baocao">Báo cáo gõ chữ</a></li>
+      <li><a href="#daucau">Dấu câu giao diện</a></li>
+      <li><a href="#save">Save bản Anh</a></li>
+      <li><a href="#kiem">Đã xem trong game</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <p class="kicker">Collar×Malice · Switch, bản Nhật</p>
+      <h1>Những thay đổi so với bản Việt hoá 2021</h1>
+      <p class="lede">Bản này làm tiếp trên PatchVietHoa 2021, cho cả game chính và <em>Collar×Malice -Unlimited-</em> (title <code>01002B400E9DA000</code>). Lời thoại trong kịch bản vẫn là bản dịch năm đó. Phần dưới là những gì người chơi nhìn thấy khác đi.</p>
+      <div class="collar" aria-hidden="true"></div>
+    </header>
+
+    <section id="giu">
+      <h2><span class="num">00</span>Những gì được giữ</h2>
+      <div class="keep">
+        <div><strong>Lời thoại</strong><span>Kịch bản STORY vẫn là bản 2021. Chỉ sửa từng dòng hỏng, dấu ngoặc và gạch đầu câu.</span></div>
+        <div><strong>Font trong game</strong><span><code>font_Normal</code> và <code>font_Mail</code> trở lại đúng byte năm 2021. Một thử nghiệm dùng khoảng cách chữ của bản Anh đã được bỏ, vì chữ đọc không đều.</span></div>
+        <div><strong>Bảng mã 2021</strong><span>Chữ Việt trong file vẫn mượn mã Hy Lạp, Kirin và số khoanh tròn, trong CP932. Font vẽ chúng giống hệt chữ Latin có dấu.</span></div>
+        <div><strong>Op và ending</strong><span>Phim mở đầu nhạc và các ending vẫn là hình tiếng Nhật. Chỉ prologue và sáu phim mở route của -Unlimited- đổi sang tiếng Anh.</span></div>
+      </div>
+      <p>Đổi kịch bản sang Latin Extended-B làm màn CG sự kiện đen và khoá hết mục Voice Recorder, kể cả sau khi sửa con trỏ. Vì vậy mọi chữ mới vẽ bằng font 2021 đều đi qua bảng mã cũ.</p>
+    </section>
+
+    <section id="chu">
+      <h2><span class="num">01</span>Khoảng cách chữ</h2>
+      <p class="tag ok">Đã xem trong game · 30/10/2026</p>
+      <div class="card pair">
+        <div class="then">
+          <h3>Bản 2021</h3>
+          <p>Danh sách Load/Save đọc thành <em>Lự a chọ n</em>: mỗi chữ có dấu bước một ô cố định, rộng khoảng 66 đơn vị, trong khi nét chữ chỉ rộng 24–42. Đổi độ rộng trong font không hết, vì đoạn vẽ danh sách save không dùng advance của chữ nhiều byte. Chữ ASCII thì bước theo advance, nên tiếng Nhật và tiếng Anh của game gốc không lộ lỗi này.</p>
+        </div>
+        <div class="now">
+          <h3>Bản này</h3>
+          <p>Mọi dòng ngang bước theo độ rộng từng chữ, rồi trừ 12 đơn vị — đúng cách màn Từ điển của bản 2021 vốn đã đọc khít và đều. Danh sách chương, Options, thanh trợ giúp, banner giữa màn, cửa sổ thoại và danh sách save đều theo bước đó. Cả hai đĩa dùng một routine cho danh sách save.</p>
+        </div>
+      </div>
+      <p>Ô save trống, trước ghi <em>新しいセーブデータ</em>, nay ghi <strong>Dữ liệu mới</strong>.</p>
+      <p>Chữ Nhật full-width vẫn cách nhau: glyph 72 đơn vị, nét khoảng 59, bước còn 60.</p>
+    </section>
+
+    <section id="mau">
+      <h2><span class="num">02</span>Khung thoại đổi màu theo người nói</h2>
+      <p>Màu khung lấy từ tên người nói, đối chiếu với bảng tên nhân vật. Không khớp thì khung là màu trung tính.</p>
+      <div class="card pair">
+        <div class="then">
+          <h3>Bản 2021</h3>
+          <p>Bảng gốc ghi mỗi nhân vật chính ba cách, toàn tiếng Nhật. Bản dịch đặt mọi người nói bằng tiếng Anh, họ đứng trước, nên không hàng nào khớp. Khung thoại của cả hai đĩa luôn trung tính.</p>
+        </div>
+        <div class="now">
+          <h3>Bản này</h3>
+          <p>Sáu hàng đầu của cả hai bảng được ghi đúng chuỗi kịch bản đang dùng — <em>Yanagi Aiji</em>, <em>Hoshino #Name[1]</em>, … — và giữ nguyên mã màu. Tên game đọc nằm ở khối chữ phía sau mã lệnh, không phải chuỗi cũ còn sót trong lệnh.</p>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>Đĩa</th><th>Tên khớp màu</th></tr></thead>
+        <tbody>
+          <tr><td>Game chính</td><td>24.748 / 32.098</td></tr>
+          <tr><td>-Unlimited-</td><td>1.638 / 1.993</td></tr>
+        </tbody>
+      </table>
+      <p>Phần còn lại là nhân vật phụ, tên gọi tắt và câu hai người nói chung (<em>A &amp; B</em>). Bản Nhật cũng để những trường hợp đó ở khung trung tính.</p>
+    </section>
+
+    <section id="phude">
+      <h2><span class="num">03</span>Phụ đề</h2>
+      <p>Bản Nhật không vẽ phụ đề. Bản Anh có, và bản này mang chúng sang executable Nhật.</p>
+
+      <h3>Voice Recorder, game chính</h3>
+      <p class="tag wait">Chưa xem trong game</p>
+      <p>25 ảnh phụ đề — năm nhân vật chính, mỗi người năm câu — được vẽ lại bằng tiếng Việt, bản dịch của Yui. Khung là panel của bản Anh; chữ là <code>font_Normal</code> của game, bước trừ 12 đơn vị như mọi dòng khác. Câu trả lời dài gấp khoảng ba lần tiếng Anh, nên co từ cỡ 0,40 xuống cho vừa khung, tối đa 12 dòng.</p>
+      <p>Năm tiêu đề câu hỏi trên atlas, bản 2021 vẽ bằng font hệ thống, nay dựng từ chính chữ của atlas tiếng Anh:</p>
+      <table>
+        <thead><tr><th>Tiếng Anh</th><th>Tiếng Việt</th></tr></thead>
+        <tbody>
+          <tr><td class="old">Basic info</td><td>Lý lịch trích ngang</td></tr>
+          <tr><td class="old">Hobbies/Skills</td><td>Sở thích/Kỹ năng</td></tr>
+          <tr><td class="old">Likes</td><td>Những thứ anh thích</td></tr>
+          <tr><td class="old">Dislikes</td><td>Những thứ anh ghét</td></tr>
+          <tr><td class="old">Your type of woman</td><td>Mẫu phụ nữ anh thích</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Voice Recorder và màn Extra, -Unlimited-</h3>
+      <p class="tag ok">Đã xem trong game · 31/10/2026</p>
+      <ul>
+        <li>83 phụ đề Voice Recorder, nguyên câu tiếng Anh của bản USA. Mỗi dòng một ảnh, tra theo mã voice. Xếp theo vị trí bảng sẽ đặt câu trả lời của Kotoho dưới câu hỏi của Mochida, vì 33 nhân vật phụ đứng khác thứ tự database.</li>
+        <li>225 câu nhân vật trên màn Extra. Hộp thoại hiện khi câu đang phát.</li>
+        <li>Khi câu trả lời dài, giữ nút sẽ cuộn chữ.</li>
+      </ul>
+      <p>Atlas Voice Recorder của -Unlimited- nằm trong GAME_02, file bản 2021 không sửa. Cột tên và số lấy từ bản Anh; năm nhân vật chính ghi bằng họ, cùng chỗ và cùng cỡ với tên riêng của bản Anh. Mười ba tiêu đề câu hỏi vẽ bằng mặt chữ đậm của chính atlas đó:</p>
+      <p>Điều anh thích ở cô ấy · Điều muốn cô ấy thay đổi · Điều muốn làm cùng cô ấy · Về gia đình · Về các mối quan hệ · Mùa và nơi yêu thích · Điều luôn để tâm · Điều thầm bận tâm · Điều giữ bí mật · Đôi lời gửi cô ấy · Tự giới thiệu · Thứ yêu thích &amp; không thể nhường · Đôi lời gửi nữ chính.</p>
+    </section>
+
+    <section id="tudien">
+      <h2><span class="num">04</span>Từ điển</h2>
+      <p>Hai mục game chính bị bản 2021 viết tắt cho vừa số byte của tên Nhật, nay viết đủ bằng những từ file đã có sẵn:</p>
+      <table>
+        <thead><tr><th></th><th>Bản 2021</th><th>Nay</th></tr></thead>
+        <tbody>
+          <tr><td>12</td><td class="old">Giết ng quá gi.hạn phòng vệ</td><td>Giết người quá giới hạn phòng vệ</td></tr>
+          <tr><td>37</td><td class="old">Ban p.chống t.phạm cn cao</td><td>Ban phòng chống tội phạm công nghệ cao</td></tr>
+          <tr><td>27</td><td class="old">Bộ trưởng</td><td>Tổng thanh tra</td></tr>
+        </tbody>
+      </table>
+      <p>Mục 27 là 警視総監, chức của Takaeda. Từ điển -Unlimited-, bảng tên 415 và các dòng kịch bản đều gọi là Tổng thanh tra. Mục game chính trước đó ghi Bộ trưởng.</p>
+      <p>Hai tên viết đủ dài hơn cột danh sách (804 và 1.009 đơn vị; mục rộng nhất còn lại là 753). Danh sách cắt mỗi dòng ở cuối thanh đỏ và cho dòng đang chọn chạy ngang. Tiêu đề trang chi tiết tránh nhãn dọc “Dictionary”.</p>
+      <p>Ba dòng mô tả vốn đã tràn khung từ năm 2021 được ngắt thêm bằng <code>#n</code>. Cùng khoảng cách chữ mới, độ rộng của chúng vẫn như hồi 2021, nên ngắt dòng là cách xử lý, không phải nới khung.</p>
+    </section>
+
+    <section id="album">
+      <h2><span class="num">05</span>BGM, danh sách phim, ending</h2>
+      <h3>Game chính</h3>
+      <p>Tiêu đề BGM, Movie và Ending List được dựng lại từ chính các chữ cái bản Mỹ đã vẽ cho hai danh sách đầu. Dấu tiếng Việt là phần chênh giữa chữ có dấu và chữ không dấu của Old Standard, đặt lên nét Anh cho khớp độ đậm. Khoảng cách học từ lề chữ của các dòng Anh.</p>
+      <p>Ending List của bản Mỹ dùng một mặt chữ khác, đậm hơn. Ở đây cả ba danh sách cùng một mặt chữ của BGM và Movie, rồi Ending List được thu về chiều cao nắp chữ của chính nó. Nhãn cố định — <em>÷ [Division]</em>, HAPPY END, dấu hỏi, chữ số, phần cuộn — lấy lại nguyên từ ảnh Nhật.</p>
+      <p>Ending <strong>Ngón tay lạnh lẽo &amp; Lời của ác quỷ</strong> trước rộng 1.056 px và đè lên <em>÷ [Division]</em>. Nhãn được trả về đúng chỗ; tiêu đề siết tối đa 2 px mỗi chữ rồi thu cỡ cho mực dừng ở mép cột trái.</p>
+
+      <h3>-Unlimited-</h3>
+      <p>Toàn bộ nằm trong GAME_02. Bản 2021 không sửa archive này, nên các màn phụ còn tiếng Nhật.</p>
+      <ul>
+        <li><strong>BGM.</strong> Mười một bài trùng game chính dùng lại tên Việt. Hai bài mới: <em>Hai nhịp tim</em> và <em>Tình yêu vô hình</em>.</li>
+        <li><strong>Movie.</strong> Sáu tiêu đề trùng game chính, cùng nhãn CATEGORY chép từ bản Anh.</li>
+        <li><strong>Tab route</strong> và nút <strong>OK / Trở về</strong> chép từ ảnh Việt đã có trong GAME_01, vì atlas cùng bố cục.</li>
+        <li>Con dấu đỏ <em>調査完了</em> trên ảnh chọn nhân vật thành <strong>Đã điều tra</strong>. Viền dấu giữ nguyên; chỉ lòng dấu được viết lại, đúng góc của từng ảnh.</li>
+      </ul>
+    </section>
+
+    <section id="kichban">
+      <h2><span class="num">06</span>Kịch bản</h2>
+      <p class="tag ok">Khớp từng byte với file đang cài · 1/11/2026</p>
+      <p>Sửa trong khối chữ. Chuỗi mới vừa khung cũ, phần dư đệm bằng số 0, nên không có con trỏ nào dịch chuyển. Bảng mã 2021 giữ nguyên. Thứ tự: sửa từng dòng, rồi ngoặc kép, rồi gạch đầu câu.</p>
+      <ul>
+        <li><strong>Dòng còn tiếng Anh.</strong> Route Shiraishi, <code>507.DAT</code>: “Shiraishi peered through the window near the door.” thành “Shiraishi-san ngó qua ô cửa sổ nhỏ cạnh cửa.” Cả bản trong mục chữ game đọc và bản sót trong lệnh đều được đổi.</li>
+        <li><strong>Chức của Takaeda.</strong> 警視総監. Bản 2021 ghi <em>Cục trưởng</em> ở game chính (46 dòng) và <em>bộ trưởng</em> ở -Unlimited- chương 252. Các dòng đó nay là <em>Tổng thanh tra</em>. Chỗ khung chữ không đủ dài thì bỏ một từ đệm (<em>ngài</em>, <em>lại</em>, <em>đấy</em>) thay vì tràn khối.</li>
+        <li><strong>Ngoặc kép.</strong> Bản 2021 dùng một dấu cho cả hai đầu, thường là <em>”</em>, chỗ thì <em>“</em>. Font vẽ hai dấu khác nhau, nên trên màn hình cả hai đầu đều đóng hoặc đều mở. Trong 36.489 dấu ở khối chữ, khoảng 15.700 dấu đứng sai phía và được đặt lại theo chữ bên cạnh. Thẻ màu bị bỏ qua khi xét. Dấu mở và dấu đóng cùng ba byte, nên chỉ đúng các byte đó đổi.</li>
+        <li><strong>Gạch đầu hộp thoại.</strong> Tiếng Nhật mở nhiều câu bằng <em>――</em>. Bản dịch giữ thành <em>-</em>, <em>--</em>, <em>—</em> hoặc <em>――</em> trước chữ đầu tiên, đọc như một dấu lạc. Dòng đầu mỗi hộp bỏ gạch đó cùng khoảng trắng theo sau. Dòng tiếp trong cùng hộp vẫn giữ. Giữ lại các dòng không có chữ sau gạch, dòng <em>“—san đang chờ đấy.”</em> (gạch đứng thay một cái tên), và kịch bản Nhật chưa dịch ở các file 9xx của STORY_02.</li>
+      </ul>
+    </section>
+
+    <section id="bangten">
+      <h2><span class="num">07</span>Bảng tên lúc nhân vật xuất hiện lần đầu</h2>
+      <p class="tag wait">Chưa xem trong game · OCR đọc đúng chức danh trên cả 55 ảnh</p>
+      <p>Effect <code>401–425</code> có trên cả hai đĩa, <code>426–434</code> chỉ có ở -Unlimited-. Ảnh Nhật và ảnh Anh khác nhau ở texture: tên Anh để tên riêng trước, chữ cái đầu đỏ, phần còn lại trắng; dòng chức danh là chữ serif nhỏ.</p>
+      <p>Bản này xếp <strong>họ trước</strong>, đúng cách kịch bản 2021 gọi người nói: <em>Yanagi Aiji</em>, <em>Sanjou</em>, <em>Souda</em>, <em>Kenzou</em>, <em>Yuusaku</em>. Mỗi từ thường được cắt nguyên khối từ chính bảng tên Anh của nhân vật đó, rồi gắn chữ cái đầu đỏ của ô nó chuyển tới. Tuổi giữ theo từng đĩa — Mikuni Rei ghi 26 ở đĩa 1 và 24 ở đĩa 2. Vì tuổi và một số tấm chỉ có một đĩa, tổng cộng 55 ảnh.</p>
+      <p>Dòng chức danh dùng từ của bản mod, lấy từ kịch bản và từ điển 2021:</p>
+      <table>
+        <thead><tr><th>Tiếng Nhật</th><th>Trên bảng tên</th></tr></thead>
+        <tbody>
+          <tr><td class="old">警視庁</td><td>Sở cảnh sát Tokyo</td></tr>
+          <tr><td class="old">新宿署</td><td>Đồn Shinjuku</td></tr>
+          <tr><td class="old">捜査一課</td><td>Ban Điều tra số 1</td></tr>
+          <tr><td class="old">鑑識課</td><td>Ban giám định</td></tr>
+          <tr><td class="old">科学捜査研究所</td><td>Phòng nghiên cứu tội phạm</td></tr>
+          <tr><td class="old">特殊地域防犯対策室</td><td>Đặc nhiệm Phòng chống Tội phạm khu vực</td></tr>
+          <tr><td class="old">警視総監</td><td>Tổng thanh tra</td></tr>
+          <tr><td class="old">依頼人</td><td>Người ủy thác</td></tr>
+        </tbody>
+      </table>
+      <p>Tấm 428, tiếng Nhật là 会社員, bản Anh ghi “Corporate Executive”. Bản này dùng chữ mod đã dùng cho 会社員 ở các tấm khác: <strong>Nhân viên văn phòng</strong>. Mực tên và chức danh dừng trước dải PROFILE.</p>
+      <p class="with-pics">Hai tấm dưới đây là ví dụ. Đủ 55 tấm nằm ở <a href="work/plate/out/plates.html">plates.html</a>.</p>
+      <div class="figs plates">
+        <figure>
+          <img src="work/plate/out/prev/401_1.png" alt="Yanagi Aiji, (cựu) Sở cảnh sát Tokyo, Ban Điều tra số 1">
+          <figcaption><b>401</b> · Đĩa 1 · Yanagi Aiji (28)<br>(cựu) Sở cảnh sát Tokyo, Ban Điều tra số 1</figcaption>
+        </figure>
+        <figure>
+          <img src="work/plate/out/prev/426_2.png" alt="Someya Yuka, nữ sinh cấp ba">
+          <figcaption><b>426</b> · -Unlimited- · Someya Yuka (18)<br>Nữ sinh cấp ba</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="dongho">
+      <h2><span class="num">08</span>Thẻ ngày giờ đầu chương</h2>
+      <p>Tấm trượt vào lúc mở chương — tiếng Nhật dạng <em>04月 10日 PM01:05</em> — là effect <code>310_現在時刻</code>. Bản Anh vẽ <strong>MONTH 04 / DAY 10 / TIME 01:05PM</strong>. Các ô tháng, ngày, sáng/chiều, giờ và phút vẫn bị xếp theo toạ độ Nhật, nên gắn ảnh Anh mà không dịch ô thì đọc thành <em>PM0:1 05</em>.</p>
+      <p>Bản này thêm đúng đoạn dịch ô của bản Anh, và thay texture: game chính lấy ảnh Anh nén lại DXT5, -Unlimited- lấy nguyên file Anh (cùng các đối tượng, header Nhật).</p>
+      <p class="tag ok">-Unlimited-, chương 1 route Yanagi · đã xem 1/11/2026</p>
+      <p class="tag wait">Thẻ của game chính chưa xem. Ảnh đồng hồ bad end và route Shiraishi chưa đụng tới.</p>
+    </section>
+
+    <section id="phim">
+      <h2><span class="num">09</span>Phim mở đầu câu chuyện</h2>
+      <p>Chữ tiếng Nhật được đốt vào hình, không nằm trong kịch bản.</p>
+      <ul>
+        <li><strong>Game chính.</strong> <code>prologue.usm</code>, phim báo cáo diễn biến vụ X-Day ở đầu chương 0, thay bằng bản Anh. Cùng dòng VP9, cùng 1.350 khung. Audio Anh ngắn hơn 10 ms. Mod trước không kèm MOVIE_01; nay có. Đoạn gõ chữ trên nền trắng ngay sau phim là effect riêng, ở mục dưới. Op và ed01–ed05 vẫn tiếng Nhật.</li>
+        <li><strong>-Unlimited-.</strong> <code>pro01.usm</code> đến <code>pro06.usm</code>, phim mở chương đầu của từng route, thay bằng bản Anh. Cùng số khung và cùng số mẫu audio. Op và ed01–ed06 vẫn tiếng Nhật.</li>
+      </ul>
+      <p class="tag wait">Prologue chưa xem trong game</p>
+    </section>
+
+    <section id="baocao">
+      <h2><span class="num">10</span>Dòng chữ đầu game và báo cáo gõ chữ</h2>
+      <p class="tag wait">Chưa xem trong game</p>
+      <p>Game mới hiện dòng “tác phẩm hư cấu”, rồi ở game chính là phim prologue, rồi một bản báo cáo được gõ ra trên nền trắng. Bản 2021 để cả dòng chữ và bản báo cáo bằng tiếng Nhật. Chúng là ảnh, không phải chữ trong kịch bản.</p>
+      <div class="card pair">
+        <div class="then">
+          <h3>Bản 2021</h3>
+          <p>Dòng “tác phẩm hư cấu” là nền <code>ADV/BG/1</code>, mỗi đĩa một ảnh Nhật. Phần ghi công tiếng Việt của bản 2021 nằm ở ảnh khác, <code>SYSTEM/FICTION</code>, và vẫn giữ nguyên.</p>
+          <p>Sau prologue, effect <code>100</code> gõ <em>X-Day 事件における経過報告書</em>, 40 nhịp phím. Effect <code>111–117</code> là bảy bản báo cáo cùng kiểu, gõ tiếp trong prologue.</p>
+        </div>
+        <div class="now">
+          <h3>Bản này</h3>
+          <p>Nền của cả hai đĩa đổi sang ảnh Anh. Effect <code>100</code> gõ <strong>Report of X-Day Incidents</strong>, 22 nhịp. Effect <code>111–117</code> đổi theo, từ <em>Report for April, May</em> đến <em>January 1st, 20XX</em>.</p>
+        </div>
+      </div>
+      <p>Mỗi nhịp phím của bản Anh phát cue 0 trong <code>typing_SE.acb</code>. Trong file Nhật, cue đó là cả đoạn gõ dài 7 giây (effect 100) hoặc tiếng cọ (111–117), và bản Nhật chỉ phát một lần. Gắn ảnh Anh mà không sửa tiếng thì mỗi chữ bật lại cả đoạn dài, chồng lên chữ trước. Cue 0 nay là một tiếng gõ: lấy đúng nốt gõ phím trong ngân hàng âm thanh và cắt còn bốn khung đầu.</p>
+      <h3>Đĩa 1</h3>
+      <div class="figs">
+        <figure>
+          <img src="work/xday/web/bg1-2021.png" alt="Màn tác phẩm hư cấu tiếng Nhật, game chính, Ichika và hoa đỏ.">
+          <figcaption>Bản 2021 · tiếng Nhật</figcaption>
+        </figure>
+        <figure>
+          <img src="work/xday/web/bg1-en.png" alt="Cùng bức ảnh, dòng chữ đổi thành This is a work of fiction.">
+          <figcaption>Bản này · tiếng Anh</figcaption>
+        </figure>
+      </div>
+      <h3>-Unlimited-</h3>
+      <div class="figs">
+        <figure>
+          <img src="work/xday/web/bg2-2021.png" alt="Màn tác phẩm hư cấu tiếng Nhật của -Unlimited-, Hoshino và thành phố.">
+          <figcaption>Bản 2021 · tiếng Nhật</figcaption>
+        </figure>
+        <figure>
+          <img src="work/xday/web/bg2-en.png" alt="Cùng bức ảnh -Unlimited-, dòng chữ tiếng Anh.">
+          <figcaption>Bản này · tiếng Anh</figcaption>
+        </figure>
+      </div>
+      <h3>Bản báo cáo, nhịp cuối</h3>
+      <div class="figs strips">
+        <figure>
+          <img src="work/xday/web/r100-2021.png" alt="X-Day 事件における経過報告書">
+          <figcaption>Effect 100 · bản 2021</figcaption>
+        </figure>
+        <figure>
+          <img src="work/xday/web/r100-en.png" alt="Report of X-Day Incidents">
+          <figcaption>Effect 100 · bản này</figcaption>
+        </figure>
+        <figure>
+          <img src="work/xday/web/r117-2021.png" alt="２０ＸＸ年、１月１日。">
+          <figcaption>Effect 117 · bản 2021</figcaption>
+        </figure>
+        <figure>
+          <img src="work/xday/web/r117-en.png" alt="January 1st, 20XX">
+          <figcaption>Effect 117 · bản này</figcaption>
+        </figure>
+      </div>
+      <p class="with-pics">Đây là texture của effect, cắt phần có chữ. Chưa phải ảnh chụp trong game.</p>
+    </section>
+
+    <section id="daucau">
+      <h2><span class="num">11</span>Dấu câu trên giao diện hệ thống</h2>
+      <p>Trong database SYSTEM của bản 2021, một số chuỗi được viết cho font Nhật đều ô. Font Việt tỉ lệ làm chúng đọc sai.</p>
+      <table>
+        <thead><tr><th>Bản 2021</th><th>Nay</th></tr></thead>
+        <tbody>
+          <tr><td class="old">Tháng 4 năm 20XX.Những ngày...</td><td>Tháng 4 năm 20XX. Những ngày...</td></tr>
+          <tr><td class="old">00.Điều tra Saeki</td><td>00. Điều tra Saeki</td></tr>
+          <tr><td class="old">Saeki１</td><td>Saeki 1</td></tr>
+          <tr><td class="old">Kiểm tra phòng／Yanagi</td><td>Kiểm tra phòng/Yanagi</td></tr>
+          <tr><td class="old">Tựa đề　：%s</td><td>Tựa đề: %s</td></tr>
+          <tr><td class="old">“Cặp Đôi Súp Miso“</td><td>mở và đóng đúng phía</td></tr>
+        </tbody>
+      </table>
+      <p>Giữ nguyên tên file (<em>gk402.DAT</em>, <em>/op.usm</em>), <em>cp.1</em>, dấu ba chấm, dấu chấm ngay trước ngắt dòng, chuỗi Nhật (<em>#n９月</em>, <em>ＯＮ／ＯＦＦ</em>) và dấu hai chấm Nhật trong chữ Nhật.</p>
+    </section>
+
+    <section id="save">
+      <h2><span class="num">12</span>Save từ bản Anh</h2>
+      <p>File save từng ô, <code>SaveDataXXXXXX.sav</code>, cùng định dạng giữa bản Nhật và bản Anh, mang sang được. <code>SystemData0000.sav</code> thì không: bản Nhật gom hai đĩa trong một file, bản Anh tách hai title. Chép một file Anh sẽ khoá Extra của đĩa kia và đặt cờ -Unlimited- sai chỗ — 365 cờ của đĩa 2 bắt đầu ở chỉ số 76 trong file Nhật, ở chỉ số 6 trong file Anh.</p>
+      <p>Có công cụ ghép hai file hệ thống tiếng Anh thành một file Nhật. Đây là đường cho người chuyển save, không đổi chữ trên màn hình.</p>
+    </section>
+
+    <section id="kiem">
+      <h2><span class="num">13</span>Đã xem trong game</h2>
+      <table>
+        <thead><tr><th>Hạng mục</th><th>Trạng thái</th></tr></thead>
+        <tbody>
+          <tr><td>Cách vẽ và bước chữ</td><td>30/10/2026</td></tr>
+          <tr><td>Phụ đề Voice Recorder và câu Extra của -Unlimited-</td><td>31/10/2026</td></tr>
+          <tr><td>Thẻ ngày giờ -Unlimited-, chương 1 route Yanagi</td><td>1/11/2026</td></tr>
+          <tr><td>Ba bước sửa kịch bản, khớp byte file đang cài</td><td>1/11/2026</td></tr>
+          <tr><td>25 phụ đề Voice Recorder tiếng Việt của game chính</td><td>Chưa xem</td></tr>
+          <tr><td>Thẻ ngày giờ của game chính</td><td>Chưa xem</td></tr>
+          <tr><td>Prologue tiếng Anh</td><td>Chưa xem</td></tr>
+          <tr><td>Dòng “tác phẩm hư cấu” và báo cáo gõ chữ</td><td>Chưa xem</td></tr>
+          <tr><td>Bảng tên nhân vật</td><td>Chưa xem. OCR đọc đúng chức danh</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <p class="remote-note">Ảnh minh hoạ chỉ có khi mở trang trên máy đã dựng mod. Bản trên mạng không kèm những file đó.</p>
+    <script>
+      function pics() {
+        document.querySelectorAll("img").forEach(function (img) {
+          if (img.complete && !img.naturalWidth) {
+            var fig = img.closest("figure");
+            if (fig) fig.hidden = true;
+          }
+        });
+        var any = false;
+        document.querySelectorAll(".figs").forEach(function (box) {
+          var shown = box.querySelector("figure:not([hidden])");
+          if (!shown) {
+            box.hidden = true;
+            var h = box.previousElementSibling;
+            if (h && h.tagName === "H3") h.hidden = true;
+          } else any = true;
+        });
+        document.querySelectorAll(".with-pics").forEach(function (p) { p.hidden = !any; });
+        var note = document.querySelector(".remote-note");
+        if (note) note.hidden = any;
+      }
+      document.querySelectorAll("img").forEach(function (img) {
+        img.addEventListener("error", pics);
+        img.addEventListener("load", pics);
+      });
+      pics();
+    </script>
+    <footer>
+      Collar×Malice và Collar×Malice -Unlimited-, bản Nhật trên Switch, làm tiếp từ PatchVietHoa 2021. Trang này ghi những gì đã đổi trên màn hình, chốt ngày 1 tháng 11 năm 2026.
+    </footer>
+  </main>
+</div>
+</body>
+</html>
