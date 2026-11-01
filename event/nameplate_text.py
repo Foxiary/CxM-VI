@@ -119,9 +119,10 @@ TITLES = {
           ['Nhân viên văn phòng']),
     423: ('Kotomine Academy, 3rd year student',
           ['Trường trung học Kotomine,', 'học sinh năm ba']),
-    # フリーター; no word for it in the mod ("Làm việc trong một cửa hàng bán quần áo.")
+    # フリーター; no word for it in the mod ("Làm việc trong một cửa hàng bán quần áo."),
+    # wording chosen by the translator
     424: ('Part-timer',
-          ['Làm bán thời gian']),
+          ['Nhân viên bán thời gian']),
     # 会社員; "Ogata, một nhân viên văn phòng"
     425: ('Office worker',
           ['Nhân viên văn phòng']),
