@@ -68,7 +68,8 @@ TITLE_X = 36
 BG_LEVEL = 14                       # red level of the plate's dark field behind the name
 RIGHT = 520                         # name and title ink stop here: the PROFILE strip starts at
                                     # 542 and the English plates keep 8+ px off it (widest 534)
-GAP_WORDS = 18                      # px between the end of a word and the next initial
+WORD_GAP = 19                       # ink gap between a word and the next initial (EN median)
+AGE_GAP = 10                        # ink gap between the name and its (age) (EN median)
 
 
 def plates(disc):
@@ -198,6 +199,52 @@ def cut(im, comp, pad=2, red=False):
     return out, x0 - pad, y0 - pad
 
 
+XLET = 'acemnorsuvwxzi'                # no ascender or descender (i without its dot)
+
+
+def cut_many(im, comps, pad=2):
+    """One white cut-out holding several components at their own relative places (a whole
+    word's lowercase as the English plate set it). Red pixels (the initial's rim) stay out."""
+    x0 = min(c[0] for c in comps) - pad
+    x1 = max(c[1] for c in comps) + pad
+    y0 = min(c[2] for c in comps) - pad
+    y1 = max(c[3] for c in comps) + pad
+    out = Image.new('RGBA', (x1 - x0 + 1, y1 - y0 + 1), (0, 0, 0, 0))
+    px, o = im.load(), out.load()
+    near = set()
+    for c in comps:
+        for x, y in c[4]:
+            for dx in range(-pad, pad + 1):
+                for dy in range(-pad, pad + 1):
+                    near.add((x + dx, y + dy))
+    for x, y in near:
+        r, g, b, _a = px[x, y]
+        if r - g > 30:
+            continue
+        t = max(0.0, min(1.0, (min(r, g, b) - BG_LEVEL) / (255 - BG_LEVEL)))
+        o[x - x0, y - y0] = (255, 255, 255, round(255 * t))
+    return out, x0, y0
+
+
+def word_run(im, letters, word, stop=10 ** 6):
+    """The lowercase of one English word as a single block: (img, top - baseline, baseline).
+    letters are the word's white components (name_parts), stop the x where the age starts."""
+    body = [c for c in letters if c[3] - c[2] > 12 and c[0] < stop][:len(word) - 1]
+    if not body:
+        return None
+    lo, hi = body[0][0] - 3, body[-1][1] + 3
+    dots = [c for c in letters if c[3] - c[2] <= 12 and lo <= (c[0] + c[1]) / 2 <= hi]
+    img, _x0, y0 = cut_many(im, body + dots)
+    xs = [c for c, ch in zip(body, word[1:]) if ch in XLET]
+    base = sorted(c[3] for c in xs)[len(xs) // 2] if xs else max(c[3] for c in body)
+    return img, y0 - base, base
+
+
+def ink_right(img):
+    box = img.split()[3].point(lambda v: 255 if v > 64 else 0).getbbox()
+    return box[2] if box else 0
+
+
 CAP_CLEAR = 8
 LETTER_GAP = 4                      # ink gap between lowercase letters (EN median)
 
@@ -222,9 +269,6 @@ def clear_of(cap, cap_y, gi, gy, x):
             if y + dy in cap_r:
                 need = max(need, cap_r[y + dy] + CAP_CLEAR - left)
     return max(x, need)
-
-
-XLET = 'acemnorsuvwxzi'                # no ascender or descender (i without its dot)
 
 
 def word_metrics(im, n):
@@ -323,6 +367,43 @@ class Letters:
                                 px[x + dx, y + dy] = bg[x + dx, y + dy]
         return out
 
+    def initial(self, letter, slot):
+        """(img, top - baseline) of a capital in word slot `slot` (1: the large one)."""
+        cap = self.caps[slot].get(letter) or self.caps[3 - slot].get(letter)
+        if cap is None:
+            raise SystemExit('no initial %r' % letter)
+        ci, rel = cap
+        if letter not in self.caps[slot]:
+            want = 90 if slot == 1 else 64
+            f = want / (ci.height - 4)
+            ci = ci.resize((round(ci.width * f), round(ci.height * f)), Image.LANCZOS)
+            rel = (8 if slot == 1 else 1) - ci.height + 2
+        return ci, rel
+
+    def word_from_run(self, text, slot, base, run, cls):
+        """[(img, x, y)] of a word: this slot's initial, then the English word's own lowercase
+        block `run` (img, top - baseline) unchanged inside, on baseline `base`. Letters the
+        mod spells and the English plate lacks (Sanjo -> Sanjou) are added after it."""
+        ci, rel = self.initial(text[0], slot)
+        cy = base + rel
+        out = [(ci, 0, cy)]
+        own = (slot, text[0]) in self.kern
+        gaps = sorted(self.kern[(slot, text[0])] if own else self.kern[(3 - slot, text[0])])
+        gap = gaps[len(gaps) // 2]
+        if not own:
+            gap = gap * (ci.width - 4) / (self.caps[3 - slot][text[0]][0].width - 4)
+        ri, rrel, en_word = run
+        x = round(ci.width - 3 + gap - 2)
+        x = clear_of(ci, cy, ri, base + rrel, x)
+        out.append((ri, x, base + rrel))
+        right = x + ink_right(ri)
+        for ch in text[len(en_word):]:
+            gi, grel, adv = self.glyph(ch, cls)
+            gx = right + LETTER_GAP - 2
+            out.append((gi, gx, base + grel))
+            right = gx + 2 + adv
+        return out, right
+
     def word(self, text, slot, base, cls):
         """[(img, x, y)] of one word on baseline `base`, x from its initial's left edge; the
         initial is this slot's, the lowercase of size class cls."""
@@ -372,23 +453,40 @@ def render(n, disc, en_im, letters):
     # name line: lay it out at full size, then shrink it about its baseline if it overruns,
     # the way the English plates start long names further left and set them tighter
     layer = Image.new('RGBA', (900, 256), (0, 0, 0, 0))
-    pen = 0
-    # one baseline for the whole line, as the English plates read
+    # The English plate reads "Given Family (age)": cut each word's lowercase as one block
+    # from this very plate, so its letters keep the places the English typesetter gave them,
+    # and set them family first. Each block takes the size of the slot it moves to (first
+    # word x-height ~30, second ~25 on most plates), and gets that slot's initial.
     metrics = word_metrics(en_im, n)
     line_base = 113
-    for slot, word in ((1, fam), (2, giv)):
-        _b, _xh, cls = metrics[slot - 1]
-        base = line_base
-        parts, width = letters.word(word, slot, base, cls)
+    (c1, l1), (c2, l2) = name_parts(en_im)
+    en_giv, en_fam = EN_NAMES[n].split()
+    age_at = [c for c in l2 if c[3] - c[2] > 12][len(en_fam) - 1:]
+    stop = age_at[0][0] - 3 if age_at else 10 ** 6
+    runs = {'fam': (word_run(en_im, l2, en_fam, stop), metrics[1][1], en_fam),
+            'giv': (word_run(en_im, l1, en_giv), metrics[0][1], en_giv)}
+    pen = 0
+    right = 0
+    for slot, key, word in ((1, 'fam', fam), (2, 'giv', giv)):
+        (ri, rrel, _b), src_xh, en_word = runs[key]
+        tgt_xh = metrics[slot - 1][1]
+        if tgt_xh != src_xh:
+            f = tgt_xh / src_xh
+            ri = ri.resize((max(1, round(ri.width * f)), max(1, round(ri.height * f))), Image.LANCZOS)
+            rrel = round(rrel * f)
+        cls = 'L' if tgt_xh >= 29 else 'S'
+        parts, width = letters.word_from_run(word, slot, line_base, (ri, rrel, en_word), cls)
         for gi, x, y in parts:
             layer.alpha_composite(gi, (pen + x, y))
-        pen += width + GAP_WORDS
+        right = pen + width
+        pen = right + WORD_GAP - 2
+    pen = right
     pieces = letters.age_of(en_im, n)
     if pieces:
         ax0 = min(x for _i, x, _y in pieces)
         for gi, x, y in pieces:
-            layer.alpha_composite(gi, (pen - 4 + x - ax0, y + line_base - metrics[1][0]))
-        pen += max(x + gi.width for gi, x, _y in pieces) - ax0
+            layer.alpha_composite(gi, (right + AGE_GAP - 2 + x - ax0, y + line_base - metrics[1][0]))
+        pen = right + AGE_GAP - 2 + max(x + gi.width for gi, x, _y in pieces) - ax0
     left = 39 if pen <= RIGHT - 39 else 22
     room = RIGHT - left
     if pen > room:

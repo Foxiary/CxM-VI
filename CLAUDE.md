@@ -345,7 +345,10 @@ written by an older repack.
 
 The STORY text repairs run in this order, each over the last one's output:
 `story/line_fixes.py` (whole lines replaced by hand: the untranslated 507
-line, the doubled quotes in STORY_02 509), `story/quotes.py`,
+line, the doubled quotes in STORY_02 509, and Takaeda's title 警視総監 as
+`Tổng thanh tra` in all 50 lines - the 2021 text said `Cục trưởng` in STORY_01
+and `bộ trưởng` in STORY_02 252; `save/dict_names.py` renames the main game's
+dictionary entry 27 from `Bộ trưởng` to match), `story/quotes.py`,
 `story/lead_dash.py`. From `STORY_01.before-507.cpk` and
 `STORY_02.before-quotes.cpk` the three reproduce the installed files byte for
 byte (checked 2026-11-01).
@@ -362,9 +365,16 @@ small white serif (Old Standard TT matches it).
 `event/nameplate.py build` rebuilds every plate from the English one in the
 mod's order, `Yanagi Aiji (28)`: it erases the English letters (red where
 r - g > 30, white above brightness 70, from y 20 to 256 outside the 143-163
-rule), puts back cut-outs of the English capitals and lowercase in family-
-first order (squeezed if too long), keeps each plate's own `(age)` cut - 417
-reads 26 on disc 1 and 24 on disc 2 - and draws the Vietnamese title from
+rule), then cuts each English word's lowercase as ONE block from that same
+plate and sets the blocks family first, each with the red initial of the slot
+it moves to and scaled to that slot's x-height (~30 first, ~25 second on most
+plates). The age `(nn)` is the plate's own (417 reads 26 on disc 1 and 24 on
+disc 2). Gaps are the English medians: 19 px of ink between words, 10 before
+the age. Building names letter by letter from a shared library, as the first
+versions did, left letters a pixel or two off each other's line and spacing -
+the English plates' letters are not on one exact baseline either, but within
+a word they sit as typeset. A letter the mod spells and the plate lacks
+(`Sanjo` -> `Sanjou`) is added after the block. The title is drawn from
 `event/nameplate_text.py`. The titles use the mod's own terms, found in the
 2021 STORY text (the text-section blocks, `story/stcm.py` `tblock`, decoded
 through `VI_2021` - the inline blocks are stale English) and dbDictionary:
@@ -375,11 +385,7 @@ through `VI_2021` - the inline blocks are stale English) and dbDictionary:
 (EN "Corporate Executive") and takes the mod's word for it. The first lowercase letter keeps the English gap
 after its initial and then at least 8 px of dark from the initial's ink, row
 by row: at the English spacing it touched the serif of `M` in game
-(`Mochida`). Every lowercase letter sits with its ink bottom on one baseline (y 113, for
-both words and the age), and each word takes its lowercase from the English
-word of the same size class (x-height ~30 or ~25): cutting each letter from
-whichever plate had it first mixed sizes and baselines a few px apart within a
-word. Name and title ink stop at x 520, clear of the PROFILE strip at
+(`Mochida`). Name and title ink stop at x 520, clear of the PROFILE strip at
 542 (the widest English line ends at 536). Spellings follow the speaker names in STORY_01/02
 (`Sanjou`, `Souda`, `Kenzou`, `Yuusaku`). `install` appends each plate to
 GAME_01/GAME_02 in both mods through `clock_en.swap`; `restore` puts the JP
