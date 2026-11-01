@@ -365,7 +365,11 @@ r - g > 30, white above brightness 70, from y 20 to 256 outside the 143-163
 rule), puts back cut-outs of the English capitals and lowercase in family-
 first order (squeezed if too long), keeps each plate's own `(age)` cut - 417
 reads 26 on disc 1 and 24 on disc 2 - and draws the Vietnamese title from
-`event/nameplate_text.py`. Spellings follow the speaker names in STORY_01/02
+`event/nameplate_text.py`. The first lowercase letter keeps the English gap
+after its initial and then at least 8 px of dark from the initial's ink, row
+by row: at the English spacing it touched the serif of `M` in game
+(`Mochida`). Name and title ink stop at x 520, clear of the PROFILE strip at
+542 (the widest English line ends at 536). Spellings follow the speaker names in STORY_01/02
 (`Sanjou`, `Souda`, `Kenzou`, `Yuusaku`). `install` appends each plate to
 GAME_01/GAME_02 in both mods through `clock_en.swap`; `restore` puts the JP
 plates back. OCR of all 55 outputs reads the Vietnamese titles exactly;

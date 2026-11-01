@@ -66,6 +66,8 @@ WHITE = 150                         # small letters / title: grey level above th
 TITLE_SIZE = 31                     # Old Standard: cap 23 px, as the English titles
 TITLE_X = 36
 BG_LEVEL = 14                       # red level of the plate's dark field behind the name
+RIGHT = 520                         # name and title ink stop here: the PROFILE strip starts at
+                                    # 542 and the English plates keep 8+ px off it (widest 534)
 GAP_WORDS = 18                      # px between the end of a word and the next initial
 
 
@@ -196,11 +198,37 @@ def cut(im, comp, pad=2, red=False):
     return out, x0 - pad, y0 - pad
 
 
+CAP_CLEAR = 8
+
+
+def clear_of(cap, cap_y, gi, gy, x):
+    """Smallest x >= the given one at which glyph gi (top gy, left x) keeps CAP_CLEAR px of
+    dark between its ink and the initial's (cap at 0, top cap_y), row by row within
+    CAP_CLEAR rows either way."""
+    def rows(im, top, right):
+        a = im.split()[3].load()
+        out = {}
+        for j in range(im.height):
+            cols = [i for i in range(im.width) if a[i, j] > 64]
+            if cols:
+                out[j + top] = max(cols) if right else min(cols)
+        return out
+    cap_r = rows(cap, cap_y, True)
+    g_l = rows(gi, gy, False)
+    need = 0
+    for y, left in g_l.items():
+        for dy in range(-CAP_CLEAR + 1, CAP_CLEAR):
+            if y + dy in cap_r:
+                need = max(need, cap_r[y + dy] + CAP_CLEAR - left)
+    return max(x, need)
+
+
 class Letters:
     """Glyphs cut from the English plates: initials by size class, small letters, age pieces."""
 
     def __init__(self, ims):
         self.caps = {1: {}, 2: {}}          # word slot -> letter -> (img, top)
+        self.kern = {}                      # (slot, initial) -> [EN ink gap to the next letter, px]
         self.small = {}                     # letter -> (img, top, advance)
         self.age = {}                       # plate -> [(img, x, y)]
         for n, im in ims.items():
@@ -211,6 +239,8 @@ class Letters:
             for slot, ((cap, letters), word) in enumerate(zip(words, (given, family)), 1):
                 ci, cx, cy = cut(im, cap, red=True)
                 self.caps[slot].setdefault(word[0], (ci, cy))
+                if letters:
+                    self.kern.setdefault((slot, word[0]), []).append(letters[0][0] - cap[1])
                 body = [c for c in letters if c[3] - c[2] > 12]
                 dots = [c for c in letters if c[3] - c[2] <= 12]
                 rest = word[1:]
@@ -267,7 +297,19 @@ class Letters:
             ci = ci.resize((round(ci.width * f), round(ci.height * f)), Image.LANCZOS)
             cy = (121 if slot == 1 else 114) - ci.height + 2
         out = [(ci, 0, cy)]
-        x = round(ci.width * 0.80)
+        # The first letter starts where it does after this initial in English: same gap from
+        # the initial's last ink column to the letter's first (median over the plates; it is
+        # negative under Y and T, whose arms overhang). Cut-outs carry 2 px of padding, so the
+        # initial's ink ends at width - 3 and a letter's ink starts 2 px into its image.
+        own = (slot, text[0]) in self.kern
+        gaps = sorted(self.kern[(slot, text[0])] if own else self.kern[(3 - slot, text[0])])
+        gap = gaps[len(gaps) // 2]
+        if not own:
+            gap = gap * (ci.width - 4) / (self.caps[3 - slot][text[0]][0].width - 4)
+        x = round(ci.width - 3 + gap - 2)
+        # then keep the letter CLEAR of the initial: at least CAP_CLEAR px between their ink
+        # in 2D (the English set lowercase against M's serif; in game it read as touching)
+        x = clear_of(ci, cy, self.small[text[1]][0], self.small[text[1]][1], x)
         for ch in text[1:]:
             gi, gy, adv = self.small[ch]
             out.append((gi, x, gy))
@@ -299,8 +341,8 @@ def render(n, disc, en_im, letters):
         for gi, x, y in pieces:
             layer.alpha_composite(gi, (pen - 4 + x - ax0, y))
         pen += max(x + gi.width for gi, x, _y in pieces) - ax0
-    room = 540 - 22
-    left = 39 if pen <= 540 - 39 else 22
+    left = 39 if pen <= RIGHT - 39 else 22
+    room = RIGHT - left
     if pen > room:
         f = room / pen
         base = 121
@@ -317,7 +359,7 @@ def render(n, disc, en_im, letters):
     d = ImageDraw.Draw(out)
     for i, line in enumerate(lines):
         size = TITLE_SIZE
-        while d.textlength(line, font=ImageFont.truetype(FONT, size)) > 545 - TITLE_X and size > 20:
+        while d.textlength(line, font=ImageFont.truetype(FONT, size)) > RIGHT - TITLE_X and size > 20:
             size -= 1
         fz = ImageFont.truetype(FONT, size)
         d.text((TITLE_X, base1 + 33 * i), line, font=fz, fill=(255, 255, 255, 255), anchor='ls')
