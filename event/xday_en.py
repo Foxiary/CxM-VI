@@ -68,6 +68,10 @@ FILES += [('GAME_01.cpk', 'ADV/BG/1.tid', 'en1'),
           ('GAME_02.cpk', 'ADV/BG/1.tid', 'unl')]
 # Yanagi's nightmare at the start of the main game ("――人殺し" ... -> "-Murderer." ...)
 FILES += [('GAME_01.cpk', 'ADV/BG/%d.tid' % n, 'en1') for n in range(812, 821)]
+FILES += [('GAME_01.cpk', 'ADV/BG/%d.tid' % n, 'en1')
+          for n in (7107, 7114, 7115, 7116, 7117, 827, 828, 829, 830, *range(840, 848))]
+# 7115 is in both discs; the JP copies match, so disc 2 gets the English main-game picture.
+FILES += [('GAME_02.cpk', 'ADV/BG/7115.tid', 'en1')]
 
 
 def out_name(cpk, name):
