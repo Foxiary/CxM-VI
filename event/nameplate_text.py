@@ -99,7 +99,7 @@ TITLES = {
     414: ('Police HQ, Crime Lab / Shinjuku Station, Field Ops Support',
           ['Sở cảnh sát Tokyo,', 'Phòng nghiên cứu tội phạm', 'Đồn Shinjuku, Đội hỗ trợ cơ động']),
     # 警視総監; dictionary title "Tổng thanh tra" = "Giám đốc sở cảnh sát Tokyo";
-    # "chỉ sau mỗi Tổng thanh tra cảnh sát". The script calls him "Cục trưởng Takaeda".
+    # "chỉ sau mỗi Tổng thanh tra cảnh sát"; story/line_fixes.py puts it in every STORY line.
     415: ('Superintendent General, / Metropolitan Police',
           ['Tổng thanh tra', 'Sở cảnh sát Tokyo']),
     # ミュージシャン; "trở thành nhạc sĩ"
