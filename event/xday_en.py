@@ -1,7 +1,7 @@
 """English case-report typing and fiction disclaimer for a new game.
 
     python3 event/xday_en.py build     write work/xday/out/ (--all: the backgrounds again too)
-    python3 event/xday_en.py install   put them into GAME_01/GAME_02 of both mods
+    python3 event/xday_en.py install   put them into GAME_01/GAME_02 of the mod
     python3 event/xday_en.py restore   put the JP files back
 
 Starting chapter 0 of the main game plays prologue.usm (English since

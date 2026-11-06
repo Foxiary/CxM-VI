@@ -27,12 +27,15 @@ executables, the English assets they copy art from, and every build output.
 
 ## Where the mod is installed
 
-Two mods are enabled for `01002b400e9da000` and both carry `romfs/CONTENTS`:
-`~/Documents/Ryujinx/mods/contents/01002b400e9da000/PatchVietHoa` and
-`~/Documents/Ryujinx/sdcard/atmosphere/contents/01002b400e9da000`. Keep them
-identical - a day once went to testing against mismatched copies. The
-executable (`exefs/main` plus the `.ips` keyed to build ID 35A63D73...) lives
-only in the PatchVietHoa mod.
+One mod is enabled for `01002b400e9da000`:
+`~/Documents/Ryujinx/mods/contents/01002b400e9da000/PatchVietHoa`, holding
+`romfs/CONTENTS` and the executable (`exefs/main` plus the `.ips` keyed to
+build ID 35A63D73...). Ryujinx lists what it loads in
+`~/Documents/Ryujinx/games/01002b400e9da000/mods.json`. A second copy of the
+romfs under `sdcard/atmosphere/contents/01002b400e9da000` was loaded too until
+2026-11-07; it was removed, since a day once went to testing against
+mismatched copies. Scripts write into the mod, and some also into the working
+copy at `~/Documents/Game/01002B400E9DA000/PatchVietHoa`.
 
 Archive ids in the executable: 0 SYSTEM, 1 STORY_01, 2 STORY_02, 3 GAME_01,
 4 GAME_02. The disc global (GOT 0x340960 in the stock layout) is 0 for the main
@@ -392,7 +395,7 @@ by row: at the English spacing it touched the serif of `M` in game
 (`Mochida`). Name and title ink stop at x 520, clear of the PROFILE strip at
 542 (the widest English line ends at 536). Spellings follow the speaker names in STORY_01/02
 (`Sanjou`, `Souda`, `Kenzou`, `Yuusaku`). `install` appends each plate to
-GAME_01/GAME_02 in both mods through `clock_en.swap`; `restore` puts the JP
+GAME_01/GAME_02 of the mod through `clock_en.swap`; `restore` puts the JP
 plates back. OCR of all 55 outputs reads the Vietnamese titles exactly;
 Vision misreads several decorative initials (Y, O, M, H) but a pixel dump
 shows them drawn. Not yet checked in game.
@@ -443,6 +446,6 @@ alive." ... in the same 2048x2048 layout. `xday_en.py` swaps them too.
 `event/xday_en.py` takes the English files whole (EN main GAME_01 for the
 effects and disc 1's background, EN -Unlimited- GAME_02 out of the NSP for
 disc 2's) and re-encodes every texture BC7 -> DXT5 into the JP header layout,
-as `clock_en.py build_unl` does. `install` appends them to both mods with
+as `clock_en.py build_unl` does. `install` appends them to the mod with
 `clock_en.swap`; `restore` puts back the JP copies kept in `work/xday/backup`.
 Not yet checked in game.

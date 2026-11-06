@@ -1,6 +1,6 @@
 """Vietnamese text for the Collar x Malice -Unlimited- extras, in the letters of the English BGM / Movie titles.
 
-    ../work/album/.venv/bin/python unlimited_album.py   # render + write into all three GAME_02.cpk copies (needs numpy)
+    ../work/album/.venv/bin/python unlimited_album.py   # render + write into both GAME_02.cpk copies (needs numpy)
     python3 unlimited_album.py --dry-run     # previews only (unl/preview/)
     python3 unlimited_album.py --restore     # put GAME_02.cpk back exactly as it was
 
@@ -41,9 +41,9 @@ ORIG = os.path.join(UNL, 'orig')              # decompressed originals, saved on
 BACKUP = os.path.join(UNL, 'backup')
 PREVIEW = os.path.join(UNL, 'preview')
 PNG_OUT = os.path.join(DATA, 'anh-sua', 'UNLIMITED')
-CPKS = [os.path.expanduser('~/Documents/Ryujinx/sdcard/atmosphere/contents/01002b400e9da000/romfs/CONTENTS/GAME_02.cpk'),
+CPKS = [
         os.path.expanduser('~/Documents/Game/01002B400E9DA000/PatchVietHoa/romfs/CONTENTS/GAME_02.cpk'),
-        # Ryujinx also loads this mod folder (games/01002b400e9da000/mods.json), so it must match
+        # the one mod Ryujinx loads (games/01002b400e9da000/mods.json)
         os.path.expanduser('~/Documents/Ryujinx/mods/contents/01002b400e9da000/PatchVietHoa/romfs/CONTENTS/GAME_02.cpk')]
 
 VR, BGM, MOV, CHAP, SIT = ('VOICERECORDER/voiceRecorderParts.tid', 'BGM/bgm_Parts.tid', 'MOVIE/movieParts.tid',

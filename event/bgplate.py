@@ -1,7 +1,7 @@
 """Name plates painted into the profile backgrounds (ADV/BG/881-893).
 
     python3 event/bgplate.py build      work/bgplate/out/<n>.tid + previews
-    python3 event/bgplate.py install    write them into GAME_01 of both mods
+    python3 event/bgplate.py install    write them into GAME_01 of the mod
     python3 event/bgplate.py restore    put the JP backgrounds back
 
 Eleven ADV/BG pictures show a character on a scene with the same name plate

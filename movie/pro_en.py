@@ -42,8 +42,7 @@ GAME = os.path.expanduser('~/Documents/Game')
 JP_NSP = os.path.join(GAME, 'Collar×Malice for Nintendo Switch [01002B400E9DA000][v0][Base].nsp')
 EN_NSP = os.path.join(GAME, 'Collar X Malice -Unlimited [0100E3B00F412000] [USA] [v0].nsp')
 VENV_PY = os.path.join(ROOT, 'work', 'album', '.venv', 'bin', 'python')
-MODS = [os.path.expanduser('~/Documents/Ryujinx/mods/contents/01002b400e9da000/PatchVietHoa/romfs/CONTENTS'),
-        os.path.expanduser('~/Documents/Ryujinx/sdcard/atmosphere/contents/01002b400e9da000/romfs/CONTENTS')]
+MODS = [os.path.expanduser('~/Documents/Ryujinx/mods/contents/01002b400e9da000/PatchVietHoa/romfs/CONTENTS')]
 MOVIES = ['pro%02d.usm' % i for i in range(1, 7)]
 EN1_CPK = os.path.join(GAME, '010083E00F40E000', 'romfs', 'MOVIE_01.CPK')
 AUDIO_SLACK = 1024             # samples; 21 ms at 48 kHz

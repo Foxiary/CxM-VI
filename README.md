@@ -96,5 +96,5 @@ python3 save/name_colour.py SYSTEM.cpk work/save/namecolour STORY_01.cpk STORY_0
 python3 ve-es/tools/cpk.py repack SYSTEM.cpk work/save/SYSTEM.new.cpk work/save/namecolour
 ```
 
-Sau khi build, chép GAME_02.cpk mới vào cả hai thư mục mod (`mods/.../PatchVietHoa` và
-`sdcard/atmosphere/...`). Hai bản phải giống hệt nhau.
+Sau khi build, chép GAME_02.cpk mới vào thư mục mod `~/Documents/Ryujinx/mods/contents/01002b400e9da000/PatchVietHoa/romfs/CONTENTS/`.
+Đây là mod duy nhất game nạp; bản sao trong `sdcard/atmosphere/...` đã bị gỡ.

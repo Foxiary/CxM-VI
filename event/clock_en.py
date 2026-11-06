@@ -2,7 +2,7 @@
 
     python3 event/clock_en.py build       work/date/out/310.CL3      (GAME_01)
     python3 event/clock_en.py build_unl   work/date/out/310_unl.CL3  (GAME_02)
-    python3 event/clock_en.py install     both into both mods
+    python3 event/clock_en.py install     both into the mod
     python3 event/clock_en.py restore     put the JP 310.CL3 back everywhere
 
 The card that slides in when a chapter starts - "MONTH 04 / DAY 10 /
@@ -39,8 +39,7 @@ DATA = os.path.join(ROOT, 'work', 'date')
 NAME = 'ADV/EFFECT/310.CL3'
 TEX = '現在時刻.tid'
 EN_CPK = os.path.expanduser('~/Documents/Game/010083E00F40E000/romfs/GAME_01.CPK')
-MODS = [os.path.expanduser('~/Documents/Ryujinx/mods/contents/01002b400e9da000/PatchVietHoa/romfs/CONTENTS'),
-        os.path.expanduser('~/Documents/Ryujinx/sdcard/atmosphere/contents/01002b400e9da000/romfs/CONTENTS')]
+MODS = [os.path.expanduser('~/Documents/Ryujinx/mods/contents/01002b400e9da000/PatchVietHoa/romfs/CONTENTS')]
 OUT = os.path.join(DATA, 'out', '310.CL3')            # GAME_01
 OUT_UNL = os.path.join(DATA, 'out', '310_unl.CL3')    # GAME_02
 UNL_NSP = os.path.expanduser('~/Documents/Game/Collar X Malice -Unlimited [0100E3B00F412000] [USA] [v0].nsp')

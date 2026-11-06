@@ -1,7 +1,7 @@
 """Character name plates (ADV/EFFECT/401-434) with the mod's names and Vietnamese titles.
 
     python3 event/nameplate.py build      render work/plate/out/<n>_<disc>.CL3 + previews
-    python3 event/nameplate.py install    write them into GAME_01 / GAME_02 of both mods
+    python3 event/nameplate.py install    write them into GAME_01 / GAME_02 of the mod
     python3 event/nameplate.py restore    put the JP plates back
 
 When a character first appears, the effect ADV/EFFECT/4nn.CL3 ("ネームプレート")
@@ -44,8 +44,7 @@ from nameplate_text import NAMES, TITLES  # noqa: E402
 
 DATA = os.path.join(ROOT, 'work', 'plate')
 FONT = os.path.join(ROOT, 'work', 'album', 'fonts', 'OldStandardTT-Regular.ttf')
-MODS = [os.path.expanduser('~/Documents/Ryujinx/mods/contents/01002b400e9da000/PatchVietHoa/romfs/CONTENTS'),
-        os.path.expanduser('~/Documents/Ryujinx/sdcard/atmosphere/contents/01002b400e9da000/romfs/CONTENTS')]
+MODS = [os.path.expanduser('~/Documents/Ryujinx/mods/contents/01002b400e9da000/PatchVietHoa/romfs/CONTENTS')]
 EN = {1: 'en1', 2: 'en2'}           # English CL3s, pulled by pull()
 JP = {1: 'jp1', 2: 'jp2'}
 EN1_CPK = os.path.expanduser('~/Documents/Game/010083E00F40E000/romfs/GAME_01.CPK')
@@ -103,7 +102,7 @@ def pull():
     """Copy the 4nn CL3s of the four sources into work/plate/<src>/."""
     import subprocess
     want = ['ADV/EFFECT/%d.CL3' % n for n in NAMES]
-    for src, path in (('jp1', os.path.join(MODS[1], 'GAME_01.cpk')), ('jp2', os.path.join(MODS[1], 'GAME_02.cpk')),
+    for src, path in (('jp1', os.path.join(MODS[0], 'GAME_01.cpk')), ('jp2', os.path.join(MODS[0], 'GAME_02.cpk')),
                       ('en1', EN1_CPK)):
         d = os.path.join(DATA, src)
         os.makedirs(d, exist_ok=True)

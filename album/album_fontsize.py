@@ -22,7 +22,7 @@ from cpk import UTF
 from tid import TID
 
 FONT = os.path.join(DATA, 'fonts', 'OldStandardTT-Regular.ttf')
-CPK_PATH = os.path.expanduser('~/Documents/Ryujinx/sdcard/atmosphere/contents/01002b400e9da000/romfs/CONTENTS/GAME_01.cpk')
+CPK_PATH = os.path.expanduser('~/Documents/Ryujinx/mods/contents/01002b400e9da000/PatchVietHoa/romfs/CONTENTS/GAME_01.cpk')
 SIZE, MIN_TRACK, SS = 74, -2.0, 4
 ROW, BASELINE, TOP_MIN, BOTTOM_MAX = 96, 70, 4, 92
 
